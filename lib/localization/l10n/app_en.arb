@@ -1,0 +1,12 @@
+{
+  "@@locale": "en",
+  "appName": "RUG",
+  "@appName": { "description": "The application name" },
+  "loading": "Loading...",
+  "error": "Something went wrong",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "ok": "OK",
+  "noInternet": "No internet connection"
+}
