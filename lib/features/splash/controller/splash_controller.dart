@@ -49,7 +49,7 @@ class SplashAnimationController {
       ),
       _loading = AnimationController(
         vsync: vsync,
-        duration: const Duration(milliseconds: 1800),
+        duration: const Duration(seconds: 50),
       ) {
     _buildTracks();
   }
@@ -104,15 +104,15 @@ class SplashAnimationController {
 
   // Post-landing idle.
 
-  late final Animation<double> floatOffset;    // Y pixel drift
-  late final Animation<double> floatRotZ;      // subtle Z tilt
-  late final Animation<double> floatScale;     // 1.00 ↔ 1.02 breathe
+  late final Animation<double> floatOffset; // Y pixel drift
+  late final Animation<double> floatRotZ; // subtle Z tilt
+  late final Animation<double> floatScale; // 1.00 ↔ 1.02 breathe
 
   // ── Glow / Impact ─────────────────────────────────────────────────────────
 
-  late final Animation<double> impactPulse;    // 0→1→0 on landing
-  late final Animation<double> glowIntensity;  // approach glow
-  late final Animation<double> glowPulse;      // idle pulse amplitude
+  late final Animation<double> impactPulse; // 0→1→0 on landing
+  late final Animation<double> glowIntensity; // approach glow
+  late final Animation<double> glowPulse; // idle pulse amplitude
 
   // ── Loading bar ───────────────────────────────────────────────────────────
 
@@ -252,43 +252,103 @@ class SplashAnimationController {
 
     // Impact pulse: 0→1→0 during bounce.
     impactPulse = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0, end: 1),
-        weight: 30,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1, end: 0),
-        weight: 70,
-      ),
-    ]).animate(
-      CurvedAnimation(parent: _bounce, curve: Curves.easeOut),
-    );
+      TweenSequenceItem(tween: Tween<double>(begin: 0, end: 1), weight: 30),
+      TweenSequenceItem(tween: Tween<double>(begin: 1, end: 0), weight: 70),
+    ]).animate(CurvedAnimation(parent: _bounce, curve: Curves.easeOut));
 
     // Idle glow pulse: sine-like 0→1→0 loop.
-    glowPulse = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 0.0, end: 1.0), weight: 50),
-      TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 0.0), weight: 50),
-    ]).animate(CurvedAnimation(parent: _glowPulse, curve: Curves.easeInOutSine));
+    glowPulse = TweenSequence<double>(
+      [
+        TweenSequenceItem(
+          tween: Tween<double>(begin: 0.0, end: 1.0),
+          weight: 50,
+        ),
+        TweenSequenceItem(
+          tween: Tween<double>(begin: 1.0, end: 0.0),
+          weight: 50,
+        ),
+      ],
+    ).animate(CurvedAnimation(parent: _glowPulse, curve: Curves.easeInOutSine));
 
     // ── Idle float (looping sine) ──────────────────────────────────────────
 
     floatOffset = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 0, end: -SplashAnimationConstants.maxAmbientOffset), weight: 25),
-      TweenSequenceItem(tween: Tween<double>(begin: -SplashAnimationConstants.maxAmbientOffset, end: 0), weight: 25),
-      TweenSequenceItem(tween: Tween<double>(begin: 0, end: SplashAnimationConstants.maxAmbientOffset), weight: 25),
-      TweenSequenceItem(tween: Tween<double>(begin: SplashAnimationConstants.maxAmbientOffset, end: 0), weight: 25),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0,
+          end: -SplashAnimationConstants.maxAmbientOffset,
+        ),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: -SplashAnimationConstants.maxAmbientOffset,
+          end: 0,
+        ),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0,
+          end: SplashAnimationConstants.maxAmbientOffset,
+        ),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: SplashAnimationConstants.maxAmbientOffset,
+          end: 0,
+        ),
+        weight: 25,
+      ),
     ]).animate(CurvedAnimation(parent: _float, curve: Curves.easeInOutSine));
 
     floatRotZ = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 0, end: -SplashAnimationConstants.maxAmbientRotation), weight: 25),
-      TweenSequenceItem(tween: Tween<double>(begin: -SplashAnimationConstants.maxAmbientRotation, end: 0), weight: 25),
-      TweenSequenceItem(tween: Tween<double>(begin: 0, end: SplashAnimationConstants.maxAmbientRotation), weight: 25),
-      TweenSequenceItem(tween: Tween<double>(begin: SplashAnimationConstants.maxAmbientRotation, end: 0), weight: 25),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0,
+          end: -SplashAnimationConstants.maxAmbientRotation,
+        ),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: -SplashAnimationConstants.maxAmbientRotation,
+          end: 0,
+        ),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0,
+          end: SplashAnimationConstants.maxAmbientRotation,
+        ),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: SplashAnimationConstants.maxAmbientRotation,
+          end: 0,
+        ),
+        weight: 25,
+      ),
     ]).animate(CurvedAnimation(parent: _float, curve: Curves.easeInOutSine));
 
     floatScale = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 1.0 + SplashAnimationConstants.breatheAmplitude), weight: 50),
-      TweenSequenceItem(tween: Tween<double>(begin: 1.0 + SplashAnimationConstants.breatheAmplitude, end: 1.0), weight: 50),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 1.0 + SplashAnimationConstants.breatheAmplitude,
+        ),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.0 + SplashAnimationConstants.breatheAmplitude,
+          end: 1.0,
+        ),
+        weight: 50,
+      ),
     ]).animate(CurvedAnimation(parent: _float, curve: Curves.easeInOutSine));
 
     // ── Loading bar ────────────────────────────────────────────────────────
@@ -328,16 +388,13 @@ class SplashAnimationController {
     // Step 2: Card deal begins 0ms after entry ends (entry already had 500ms
     // delay baked in via dealDelay — both controllers fire together for
     // precise timing, but the card's appearance starts from off-screen).
-    await Future.wait([
-      _cardFlight.forward(),
-      _rotation.forward(),
-    ]);
+    await Future.wait([_cardFlight.forward(), _rotation.forward()]);
 
     // Step 3: Card has landed — run bounce + start idle loops + fill loading bar.
     await _bounce.forward();
     unawaited(_float.repeat());
     unawaited(_glowPulse.repeat());
-    // Await loading fill so navigation happens only after bar completes (~1.8s).
+    // Await loading fill so navigation happens only after the temporary 50s load.
     await _loading.forward();
   }
 
