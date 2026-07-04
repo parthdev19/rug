@@ -56,8 +56,7 @@ class _HeroCardPainter extends CustomPainter {
   final double glow;
 
   // ── Palette from reference ─────────────────────────────────────────────────
-  static const Color _baseDark = Color(0xFF0F1F1A);
-  static const Color _baseMid = Color(0xFF1F3B2E);
+  static const Color _cardFace = Color(0xFF11342F);
   static const Color _emerald = Color(0xFF00FFB2);
   static const Color _gold = Color(0xFFD4AF37);
   static const Color _goldBright = Color(0xFFFFD166);
@@ -84,7 +83,7 @@ class _HeroCardPainter extends CustomPainter {
         ..shader = const RadialGradient(
           center: Alignment(0, -0.3),
           radius: 1.1,
-          colors: [_baseMid, _baseDark, Color(0xFF060F0B)],
+          colors: [_cardFace, _cardFace, _cardFace],
           stops: [0.0, 0.55, 1.0],
         ).createShader(rect),
     );
