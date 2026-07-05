@@ -66,17 +66,16 @@ class _SplashScreenState extends State<SplashScreen>
               impactAnimation: _anim.impactPulse,
             ),
 
-            // ── Foreground: logo + card + loading ───────────────────────────
+            // ── Foreground: tagline + card + loading ────────────────────────
             SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Logo + tagline — single Positioned so spacing flows
-                      // naturally without a hardcoded pixel offset.
+                      // Tagline retains the existing entry animation.
                       Positioned(
-                        top: constraints.maxHeight * 0.055,
+                        top: constraints.maxHeight * 0.035,
                         left: 0,
                         right: 0,
                         child: AnimatedBuilder(
@@ -91,7 +90,6 @@ class _SplashScreenState extends State<SplashScreen>
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const SplashLogo(),
-                                    // Tagline fades in slightly after logo.
                                     Opacity(
                                       opacity: _anim.taglineOpacity.value,
                                       child: Transform.translate(
@@ -112,10 +110,10 @@ class _SplashScreenState extends State<SplashScreen>
 
                       // Hero card — its own RepaintBoundary inside.
                       Positioned(
-                        top: constraints.maxHeight * 0.28,
+                        top: constraints.maxHeight * 0.16,
                         left: 0,
                         right: 0,
-                        bottom: constraints.maxHeight * 0.13,
+                        bottom: constraints.maxHeight * 0.25,
                         child: Center(
                           child: FloatingCardAnimation(controller: _anim),
                         ),
@@ -123,7 +121,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                       // Loading bar — appears after card settles.
                       Positioned(
-                        bottom: constraints.maxHeight * 0.045,
+                        bottom: constraints.maxHeight * 0.075,
                         child: AnimatedBuilder(
                           animation: _anim.loadingListenable,
                           builder: (context, child) => Opacity(

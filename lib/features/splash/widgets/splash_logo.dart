@@ -11,32 +11,9 @@ class SplashLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       mainAxisSize: MainAxisSize.min,
-      children: [
-        // App icon / crest
-        Container(
-          width: 54,
-          height: 54,
-          decoration: BoxDecoration(
-            color: const Color(0xFF080B09),
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: const [
-              BoxShadow(color: Color(0x3327FF75), blurRadius: 24),
-            ],
-          ),
-          child: const _Crest(),
-        ),
-
-        // 36dp space between icon and title (spec: 32–40dp)
-        const SizedBox(height: 36),
-
-        // Decorative "·— RUG —·" wordmark row
-        const _WordmarkRow(),
-
-        // 24dp space between title and tagline (spec: 20–28dp)
-        const SizedBox(height: 24),
-      ],
+      children: [_WordmarkRow(), SizedBox(height: 24)],
     );
   }
 }
@@ -120,7 +97,8 @@ class SplashTagline extends StatelessWidget {
   const SplashTagline({super.key});
 
   // Picked once per app launch — Random() without a seed uses system entropy.
-  static final String _text = _taglines[math.Random().nextInt(_taglines.length)];
+  static final String _text =
+      _taglines[math.Random().nextInt(_taglines.length)];
 
   static const List<String> _taglines = [
     'EVERY PLAYER WANTS\nTHE THREE OF CLUBS.',
@@ -197,56 +175,7 @@ class _OrnamentRow extends StatelessWidget {
       child: Container(
         width: 5,
         height: 5,
-        decoration: const BoxDecoration(
-          color: SplashAnimationConstants.gold,
-        ),
-      ),
-    );
-  }
-}
-
-class _Crest extends StatelessWidget {
-  const _Crest();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Stack(
-      alignment: Alignment.center,
-      children: [
-        Positioned(top: 10, child: _GoldPip()),
-        Positioned(left: 13, top: 24, child: _GoldPip()),
-        Positioned(right: 13, top: 24, child: _GoldPip()),
-        Positioned(
-          bottom: 7,
-          child: Text(
-            'RUG',
-            style: TextStyle(
-              color: SplashAnimationConstants.gold,
-              fontSize: 7,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _GoldPip extends StatelessWidget {
-  const _GoldPip();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [SplashAnimationConstants.brightGold, Color(0xFFB77D00)],
-        ),
-        boxShadow: [BoxShadow(color: Color(0x88FFD85A), blurRadius: 7)],
+        decoration: const BoxDecoration(color: SplashAnimationConstants.gold),
       ),
     );
   }
