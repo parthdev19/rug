@@ -5,8 +5,10 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rug/features/auth/widgets/auth_widgets.dart';
 import 'package:rug/features/splash/widgets/splash_animation_constants.dart';
+import 'package:rug/routes/route_names.dart';
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
@@ -79,7 +81,7 @@ class AuthScreen extends StatelessWidget {
                           // ── EMAIL BUTTON ─────────────────────────────────────────
                           EmailButton(
                             onPressed: () {
-                              // Action triggered on Sign in with Email
+                              context.push(RouteNames.login);
                             },
                           ),
 

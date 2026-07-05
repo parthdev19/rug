@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rug/features/auth/presentation/auth_screen.dart';
+import 'package:rug/features/auth/presentation/email_sign_in_screen.dart';
+import 'package:rug/features/auth/presentation/register_screen.dart';
 import 'package:rug/features/splash/presentation/splash_screen.dart';
 import 'package:rug/routes/route_names.dart';
 import 'package:rug/shared/providers/common_providers.dart';
@@ -52,14 +54,60 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'login',
             name: 'login',
-            builder: (context, state) =>
-                const _PlaceholderScreen(name: 'Login'),
+            pageBuilder: (context, state) {
+              return CustomTransitionPage<void>(
+                key: state.pageKey,
+                child: const EmailSignInScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(0.0, 0.05);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOut;
+
+                  final tween = Tween(begin: begin, end: end).chain(
+                    CurveTween(curve: curve),
+                  );
+                  final offsetAnimation = animation.drive(tween);
+
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    ),
+                  );
+                },
+              );
+            },
           ),
           GoRoute(
             path: 'register',
             name: 'register',
-            builder: (context, state) =>
-                const _PlaceholderScreen(name: 'Register'),
+            pageBuilder: (context, state) {
+              return CustomTransitionPage<void>(
+                key: state.pageKey,
+                child: const RegisterScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(0.0, 0.05);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOut;
+
+                  final tween = Tween(begin: begin, end: end).chain(
+                    CurveTween(curve: curve),
+                  );
+                  final offsetAnimation = animation.drive(tween);
+
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ],
       ),
