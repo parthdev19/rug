@@ -49,7 +49,7 @@ class SplashAnimationController {
       ),
       _loading = AnimationController(
         vsync: vsync,
-        duration: const Duration(seconds: 50),
+        duration: const Duration(seconds: 2),
       ) {
     _buildTracks();
   }

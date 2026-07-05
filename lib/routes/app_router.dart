@@ -7,6 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rug/features/auth/presentation/auth_screen.dart';
 import 'package:rug/features/splash/presentation/splash_screen.dart';
 import 'package:rug/routes/route_names.dart';
 import 'package:rug/shared/providers/common_providers.dart';
@@ -46,7 +47,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteNames.auth,
         name: 'auth',
-        builder: (context, state) => const _PlaceholderScreen(name: 'Auth'),
+        builder: (context, state) => const AuthScreen(),
         routes: [
           GoRoute(
             path: 'login',
