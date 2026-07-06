@@ -95,7 +95,7 @@ class AuthScreen extends StatelessWidget {
                           // ── GUEST BUTTON ─────────────────────────────────────────
                           GuestButton(
                             onPressed: () {
-                              // Action triggered on Play as Guest
+                              context.push(RouteNames.guestUsername);
                             },
                           ),
 

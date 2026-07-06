@@ -184,20 +184,7 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                                 _TextAction(
                                   label: 'Forgot Password?',
                                   onPressed: () {
-                                    // Navigation placeholder recovery screen
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        backgroundColor: const Color(0xFF161B22),
-                                        content: const Text(
-                                          'Forgot Password screen placeholder',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                        behavior: SnackBarBehavior.floating,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                    );
+                                    context.push(RouteNames.forgotPassword);
                                   },
                                 ),
                               ],

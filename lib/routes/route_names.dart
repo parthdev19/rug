@@ -11,6 +11,10 @@ class RouteNames {
   static const String auth = '/auth';
   static const String login = '/auth/login';
   static const String register = '/auth/register';
+  static const String forgotPassword = '/auth/forgot-password';
+  static const String verifyOtp = '/auth/verify-otp';
+  static const String resetPassword = '/auth/reset-password';
+  static const String guestUsername = '/auth/guest-username';
 
   // Main
   static const String home = '/home';

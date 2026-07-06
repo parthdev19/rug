@@ -319,6 +319,109 @@ abstract class _$CurrentUserId extends $Notifier<String?> {
   }
 }
 
+/// Current logged in user model (null when not logged in).
+
+@ProviderFor(CurrentUser)
+final currentUserProvider = CurrentUserProvider._();
+
+/// Current logged in user model (null when not logged in).
+final class CurrentUserProvider
+    extends $NotifierProvider<CurrentUser, UserModel?> {
+  /// Current logged in user model (null when not logged in).
+  CurrentUserProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentUserProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentUserHash();
+
+  @$internal
+  @override
+  CurrentUser create() => CurrentUser();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UserModel? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UserModel?>(value),
+    );
+  }
+}
+
+String _$currentUserHash() => r'a5823c796e2ee4e483a4bb780a73b9d37421318d';
+
+/// Current logged in user model (null when not logged in).
+
+abstract class _$CurrentUser extends $Notifier<UserModel?> {
+  UserModel? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<UserModel?, UserModel?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<UserModel?, UserModel?>,
+              UserModel?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// Helper provider to check if the current user is a guest.
+
+@ProviderFor(isGuest)
+final isGuestProvider = IsGuestProvider._();
+
+/// Helper provider to check if the current user is a guest.
+
+final class IsGuestProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Helper provider to check if the current user is a guest.
+  IsGuestProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'isGuestProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$isGuestHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return isGuest(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$isGuestHash() => r'b4c1049c1f0ac015ad9d4be317a29d352671bcf4';
+
 /// Network connectivity status.
 
 @ProviderFor(isOnline)

@@ -7,6 +7,7 @@ import 'package:rug/services/network/dio_client.dart';
 import 'package:rug/services/network/network_info.dart';
 import 'package:rug/services/storage/local_storage_service.dart';
 import 'package:rug/services/storage/secure_storage_service.dart';
+import 'package:rug/shared/models/user_model.dart';
 
 part 'common_providers.g.dart';
 
@@ -44,6 +45,24 @@ class CurrentUserId extends _$CurrentUserId {
 
   /// Update the current user ID.
   void setUserId(String? value) => state = value;
+}
+
+/// Current logged in user model (null when not logged in).
+@riverpod
+class CurrentUser extends _$CurrentUser {
+  @override
+  UserModel? build() => null;
+
+  /// Update the current user.
+  void setUser(UserModel? user) => state = user;
+}
+
+/// Helper provider to check if the current user is a guest.
+@riverpod
+bool isGuest(Ref ref) {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return false;
+  return user.id.startsWith('guest_');
 }
 
 /// Network connectivity status.

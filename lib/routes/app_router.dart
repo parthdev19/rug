@@ -10,6 +10,11 @@ import 'package:go_router/go_router.dart';
 import 'package:rug/features/auth/presentation/auth_screen.dart';
 import 'package:rug/features/auth/presentation/email_sign_in_screen.dart';
 import 'package:rug/features/auth/presentation/register_screen.dart';
+import 'package:rug/features/auth/presentation/forgot_password_screen.dart';
+import 'package:rug/features/auth/presentation/otp_verification_screen.dart';
+import 'package:rug/features/auth/presentation/reset_password_screen.dart';
+import 'package:rug/features/auth/presentation/guest_username_screen.dart';
+import 'package:rug/features/home/presentation/home_screen.dart';
 import 'package:rug/features/splash/presentation/splash_screen.dart';
 import 'package:rug/routes/route_names.dart';
 import 'package:rug/shared/providers/common_providers.dart';
@@ -109,6 +114,122 @@ final routerProvider = Provider<GoRouter>((ref) {
               );
             },
           ),
+          GoRoute(
+            path: 'forgot-password',
+            name: 'forgotPassword',
+            pageBuilder: (context, state) {
+              return CustomTransitionPage<void>(
+                key: state.pageKey,
+                child: const ForgotPasswordScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(0.0, 0.05);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOut;
+
+                  final tween = Tween(begin: begin, end: end).chain(
+                    CurveTween(curve: curve),
+                  );
+                  final offsetAnimation = animation.drive(tween);
+
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          GoRoute(
+            path: 'verify-otp',
+            name: 'verifyOtp',
+            pageBuilder: (context, state) {
+              return CustomTransitionPage<void>(
+                key: state.pageKey,
+                child: const OtpVerificationScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(0.0, 0.05);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOut;
+
+                  final tween = Tween(begin: begin, end: end).chain(
+                    CurveTween(curve: curve),
+                  );
+                  final offsetAnimation = animation.drive(tween);
+
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          GoRoute(
+            path: 'reset-password',
+            name: 'resetPassword',
+            pageBuilder: (context, state) {
+              return CustomTransitionPage<void>(
+                key: state.pageKey,
+                child: const ResetPasswordScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(0.0, 0.05);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOut;
+
+                  final tween = Tween(begin: begin, end: end).chain(
+                    CurveTween(curve: curve),
+                  );
+                  final offsetAnimation = animation.drive(tween);
+
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          GoRoute(
+            path: 'guest-username',
+            name: 'guestUsername',
+            pageBuilder: (context, state) {
+              return CustomTransitionPage<void>(
+                key: state.pageKey,
+                child: const GuestUsernameScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(0.0, 0.05);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOut;
+
+                  final tween = Tween(begin: begin, end: end).chain(
+                    CurveTween(curve: curve),
+                  );
+                  final offsetAnimation = animation.drive(tween);
+
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         ],
       ),
 
@@ -117,7 +238,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteNames.home,
         name: 'home',
-        builder: (context, state) => const _PlaceholderScreen(name: 'Home'),
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
         path: RouteNames.profile,

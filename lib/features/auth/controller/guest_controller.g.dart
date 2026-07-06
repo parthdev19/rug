@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'register_controller.dart';
+part of 'guest_controller.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,52 +9,51 @@ part of 'register_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(RegisterController)
-final registerControllerProvider = RegisterControllerProvider._();
+@ProviderFor(GuestController)
+final guestControllerProvider = GuestControllerProvider._();
 
-final class RegisterControllerProvider
-    extends $NotifierProvider<RegisterController, RegisterState> {
-  RegisterControllerProvider._()
+final class GuestControllerProvider
+    extends $NotifierProvider<GuestController, AsyncValue<void>> {
+  GuestControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'registerControllerProvider',
+        name: r'guestControllerProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$registerControllerHash();
+  String debugGetCreateSourceHash() => _$guestControllerHash();
 
   @$internal
   @override
-  RegisterController create() => RegisterController();
+  GuestController create() => GuestController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(RegisterState value) {
+  Override overrideWithValue(AsyncValue<void> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<RegisterState>(value),
+      providerOverride: $SyncValueProvider<AsyncValue<void>>(value),
     );
   }
 }
 
-String _$registerControllerHash() =>
-    r'5b8b52b0a9786fe4a16e0bfcdb5316a541e057b4';
+String _$guestControllerHash() => r'dcbf02b071427d74bd3084e49d41bd26d7b1863c';
 
-abstract class _$RegisterController extends $Notifier<RegisterState> {
-  RegisterState build();
+abstract class _$GuestController extends $Notifier<AsyncValue<void>> {
+  AsyncValue<void> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<RegisterState, RegisterState>;
+    final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<RegisterState, RegisterState>,
-              RegisterState,
+              AnyNotifier<AsyncValue<void>, AsyncValue<void>>,
+              AsyncValue<void>,
               Object?,
               Object?
             >;
