@@ -22,6 +22,7 @@ class RouteNames {
   static const String settings = '/settings';
 
   // Game
+  static const String createGame = '/create-game';
   static const String gameLobby = '/game-lobby';
   static const String privateRoom = '/private-room';
   static const String multiplayerTable = '/multiplayer-table';

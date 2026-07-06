@@ -15,6 +15,7 @@ import 'package:rug/features/auth/presentation/otp_verification_screen.dart';
 import 'package:rug/features/auth/presentation/reset_password_screen.dart';
 import 'package:rug/features/auth/presentation/guest_username_screen.dart';
 import 'package:rug/features/home/presentation/home_screen.dart';
+import 'package:rug/features/create_game/presentation/create_game_screen.dart';
 import 'package:rug/features/splash/presentation/splash_screen.dart';
 import 'package:rug/routes/route_names.dart';
 import 'package:rug/shared/providers/common_providers.dart';
@@ -252,6 +253,34 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // Game
+      GoRoute(
+        path: RouteNames.createGame,
+        name: 'createGame',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: const CreateGameScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 0.05);
+              const end = Offset.zero;
+              const curve = Curves.easeInOut;
+
+              final tween = Tween(begin: begin, end: end).chain(
+                CurveTween(curve: curve),
+              );
+              final offsetAnimation = animation.drive(tween);
+
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: offsetAnimation,
+                  child: child,
+                ),
+              );
+            },
+          );
+        },
+      ),
       GoRoute(
         path: RouteNames.gameLobby,
         name: 'gameLobby',

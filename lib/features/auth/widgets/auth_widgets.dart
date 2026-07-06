@@ -3,7 +3,7 @@ export 'google_button.dart';
 export 'guest_button.dart';
 export 'hero_card.dart';
 export 'legal_section.dart';
-export 'primary_button.dart';
+export '../../../widgets/buttons/primary_button.dart';
 export 'email_text_field.dart';
 export 'password_text_field.dart';
 export 'profile_image_picker.dart';

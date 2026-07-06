@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rug/features/auth/widgets/hero_card.dart' as auth_widgets;
 import 'package:rug/features/home/controller/home_controller.dart';
 import 'package:rug/features/home/presentation/widgets/lobby_background.dart';
 import 'package:rug/features/home/presentation/widgets/lobby_widgets.dart';
+import 'package:rug/routes/route_names.dart';
 import 'package:rug/shared/providers/common_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -63,8 +65,7 @@ class HomeScreen extends ConsumerWidget {
                       // ── SECONDARY ACTION CARD (CREATE GAME) ──────────────────
                       SecondaryActionCard(
                         onPressed: () {
-                          ref.read(homeControllerProvider.notifier).createGame();
-                          // Future navigation hook for private lobby screen
+                          context.push(RouteNames.createGame);
                         },
                       ),
                       const SizedBox(height: 36),
