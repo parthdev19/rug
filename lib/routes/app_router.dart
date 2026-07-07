@@ -16,6 +16,7 @@ import 'package:rug/features/auth/presentation/reset_password_screen.dart';
 import 'package:rug/features/auth/presentation/guest_username_screen.dart';
 import 'package:rug/features/home/presentation/home_screen.dart';
 import 'package:rug/features/create_game/presentation/create_game_screen.dart';
+import 'package:rug/features/game_table/presentation/game_table_screen.dart';
 import 'package:rug/features/splash/presentation/splash_screen.dart';
 import 'package:rug/routes/route_names.dart';
 import 'package:rug/shared/providers/common_providers.dart';
@@ -276,6 +277,22 @@ final routerProvider = Provider<GoRouter>((ref) {
                   position: offsetAnimation,
                   child: child,
                 ),
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: RouteNames.gameTable,
+        name: 'gameTable',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: const GameTableScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
               );
             },
           );

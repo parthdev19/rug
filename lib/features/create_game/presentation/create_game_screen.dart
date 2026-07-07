@@ -136,8 +136,8 @@ class CreateGameScreen extends ConsumerWidget {
                             label: 'Create Game',
                             onPressed: () {
                               if (notifier.validate()) {
-                                // Navigate to the private room (API integration will be added later)
-                                context.push(RouteNames.privateRoom);
+                                // Navigate to the game table screen
+                                context.push(RouteNames.gameTable);
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
