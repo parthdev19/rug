@@ -1,10 +1,13 @@
 /// Controller managing game table state and actions.
+///
+/// Handles game phases: waiting → countdown → dealing → playing.
 library;
 
 import 'dart:math';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rug/features/create_game/controller/create_game_controller.dart';
 import 'package:rug/features/game_table/controller/game_table_state.dart';
+import 'package:rug/features/game_table/models/card_model.dart';
 import 'package:rug/features/game_table/models/player_seat_model.dart';
 import 'package:rug/shared/providers/common_providers.dart';
 
@@ -30,9 +33,6 @@ class GameTableController extends _$GameTableController {
       totalPlayers: config.totalPlayers,
       totalRounds: config.totalRounds,
       defaultPoints: config.defaultPoints,
-      currentRound: 1,
-      gameStatus: GameStatus.waiting,
-      currentTurnIndex: 0,
     );
   }
 
@@ -58,9 +58,6 @@ class GameTableController extends _$GameTableController {
       username: currentUsername,
       seatIndex: 0,
       isCurrentPlayer: true,
-      isCurrentTurn: true,
-      status: PlayerStatus.ready,
-      connectionStatus: ConnectionStatus.online,
     ));
 
     // Fill remaining seats with mock opponents
@@ -76,12 +73,77 @@ class GameTableController extends _$GameTableController {
         username: name,
         seatIndex: i,
         isDealer: i == 1, // First opponent is dealer for mock
-        status: PlayerStatus.waiting,
-        connectionStatus: ConnectionStatus.online,
       ));
     }
 
     return players;
+  }
+
+  // ── Game Flow ──────────────────────────────────────────────────────────
+
+  /// Host starts the game. Begins countdown sequence.
+  Future<void> startGame() async {
+    if (!state.isHost || state.gameStatus != GameStatus.waiting) return;
+
+    // Mark all players as ready
+    final readyPlayers = state.players
+        .map((p) => p.copyWith(status: PlayerStatus.ready))
+        .toList();
+    state = state.copyWith(
+      players: readyPlayers,
+      gameStatus: GameStatus.countdown,
+      countdownValue: 3,
+    );
+
+    // 3 → 2 → 1 → GO
+    for (int i = 3; i >= 0; i--) {
+      await Future.delayed(const Duration(milliseconds: 900));
+      if (state.gameStatus != GameStatus.countdown) return; // cancelled
+      state = state.copyWith(countdownValue: i);
+    }
+
+    // Short pause after GO
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    // Begin dealing
+    _dealCards();
+  }
+
+  /// Shuffle and distribute cards to all players.
+  void _dealCards() {
+    final deck = Deck.shuffle(Deck.fullDeck());
+    final result = Deck.distribute(
+      deck: deck,
+      playerCount: state.players.length,
+    );
+
+    // Mark players as playing
+    final playingPlayers = state.players
+        .map((p) => p.copyWith(status: PlayerStatus.playing))
+        .toList();
+
+    state = state.copyWith(
+      gameStatus: GameStatus.dealing,
+      players: playingPlayers,
+      playerHands: result.hands,
+      drawPile: result.drawPile,
+    );
+  }
+
+  /// Called when dealing animation completes.
+  void onDealingComplete() {
+    // Set current turn to player after dealer
+    final turnIndex = (state.dealerIndex + 1) % state.players.length;
+    final updatedPlayers = state.players.asMap().entries.map((e) {
+      return e.value.copyWith(isCurrentTurn: e.key == turnIndex);
+    }).toList();
+
+    state = state.copyWith(
+      gameStatus: GameStatus.playing,
+      dealingComplete: true,
+      currentTurnIndex: turnIndex,
+      players: updatedPlayers,
+    );
   }
 
   /// Leave the table (placeholder for future API call).

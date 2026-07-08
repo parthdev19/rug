@@ -3,7 +3,7 @@ library;
 
 class CreateGameState {
   const CreateGameState({
-    this.totalPlayers = 4,
+    this.totalPlayers = 5,
     this.defaultPoints = 100,
     this.totalRounds = 5,
     this.isValid = true,

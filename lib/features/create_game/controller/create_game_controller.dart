@@ -20,9 +20,9 @@ class CreateGameController extends _$CreateGameController {
     }
   }
 
-  /// Decrement the total players count (minimum of 4).
+  /// Decrement the total players count (minimum of 5).
   void decrementPlayers() {
-    if (state.totalPlayers > 4) {
+    if (state.totalPlayers > 5) {
       state = state.copyWith(totalPlayers: state.totalPlayers - 1);
     }
   }
@@ -57,7 +57,7 @@ class CreateGameController extends _$CreateGameController {
 
   /// Validates the configured values.
   bool validate() {
-    final playersOk = state.totalPlayers >= 4 && state.totalPlayers <= 9;
+    final playersOk = state.totalPlayers >= 5 && state.totalPlayers <= 9;
     final pointsOk = state.defaultPoints >= 100 && state.defaultPoints <= 170;
     final roundsOk = state.totalRounds >= 1 && state.totalRounds <= 20;
     final valid = playersOk && pointsOk && roundsOk;

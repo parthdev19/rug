@@ -42,7 +42,7 @@ final class CreateGameControllerProvider
 }
 
 String _$createGameControllerHash() =>
-    r'610d4b025da2d4c2ae1a60afafa12102c1882e4e';
+    r'f0ad95526e1acb7242a9a51ab097aa65c3386fde';
 
 abstract class _$CreateGameController extends $Notifier<CreateGameState> {
   CreateGameState build();

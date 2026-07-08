@@ -92,7 +92,7 @@ class CreateGameScreen extends ConsumerWidget {
                             icon: Icons.people_alt_outlined,
                             child: NumberSelector(
                               value: state.totalPlayers,
-                              minValue: 4,
+                              minValue: 5,
                               maxValue: 9,
                               label: state.totalPlayers == 1 ? 'Player' : 'Players',
                               onDecrement: notifier.decrementPlayers,
