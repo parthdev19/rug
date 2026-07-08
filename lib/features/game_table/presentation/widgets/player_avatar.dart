@@ -8,7 +8,7 @@ import 'package:rug/features/splash/widgets/splash_animation_constants.dart';
 class PlayerAvatar extends StatelessWidget {
   const PlayerAvatar({
     required this.player,
-    this.size = 44,
+    this.size = 48,
     super.key,
   });
 

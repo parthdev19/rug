@@ -1,8 +1,9 @@
 /// Premium landscape game table screen.
 ///
 /// Locks orientation to landscape on entry, restores portrait on exit.
-/// Renders an oval felt table with dynamically positioned player seats,
-/// a center info panel, top header bar, and bottom action controls.
+/// Renders a capsule (rounded-rectangle) felt table with dynamically
+/// positioned player seats, a center info panel, auto-hiding top toolbar,
+/// and auto-hiding bottom action controls with swipe-to-reveal gestures.
 library;
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rug/features/game_table/controller/game_table_controller.dart';
+import 'package:rug/features/game_table/presentation/widgets/auto_hide_bar.dart';
 import 'package:rug/features/game_table/presentation/widgets/bottom_controls.dart';
 import 'package:rug/features/game_table/presentation/widgets/player_seat.dart';
 import 'package:rug/features/game_table/presentation/widgets/seat_layout_calculator.dart';
@@ -29,6 +31,10 @@ class _GameTableScreenState extends ConsumerState<GameTableScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
   late final Animation<double> _fadeAnimation;
+
+  // Auto-hide bar keys for programmatic control
+  final _topBarKey = GlobalKey<AutoHideBarState>();
+  final _bottomBarKey = GlobalKey<AutoHideBarState>();
 
   @override
   void initState() {
@@ -67,10 +73,24 @@ class _GameTableScreenState extends ConsumerState<GameTableScreen>
     super.dispose();
   }
 
+  /// Check if any player whose isCurrentPlayer=true also has isCurrentTurn=true.
+  bool _isLocalPlayerTurn() {
+    final state = ref.read(gameTableControllerProvider);
+    return state.players.any((p) => p.isCurrentPlayer && p.isCurrentTurn);
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(gameTableControllerProvider);
     final screenSize = MediaQuery.sizeOf(context);
+    final safePadding = MediaQuery.paddingOf(context);
+    final isMyTurn = _isLocalPlayerTurn();
+
+    // Table proportions (matching TableSurface painter)
+    final tableWidth = screenSize.width * 0.82;
+    final tableHeight = screenSize.height * 0.67;
+    final cornerRadius = screenSize.height * 0.08;
+    final tableCenter = Offset(screenSize.width / 2, screenSize.height / 2);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -114,30 +134,23 @@ class _GameTableScreenState extends ConsumerState<GameTableScreen>
             // ── 4. Player seats ─────────────────────────────────────────
             LayoutBuilder(
               builder: (context, constraints) {
-                final tableCenter = Offset(
-                  constraints.maxWidth / 2,
-                  constraints.maxHeight / 2,
-                );
-                // Seat ellipse is slightly smaller than the table
-                // to place avatars on the edge of the table
-                final seatRadiusX = screenSize.width * 0.38;
-                final seatRadiusY = screenSize.height * 0.34;
-
+                // Seat positions along the table perimeter
                 final seatPositions = SeatLayoutCalculator.computeSeats(
                   center: tableCenter,
-                  radiusX: seatRadiusX,
-                  radiusY: seatRadiusY,
+                  tableWidth: tableWidth,
+                  tableHeight: tableHeight,
                   playerCount: state.players.length,
+                  cornerRadius: cornerRadius,
                 );
+
+                // Seat widget dimensions
+                const seatWidth = 76.0;
+                const seatHeight = 96.0;
 
                 return Stack(
                   children: List.generate(state.players.length, (index) {
                     final player = state.players[index];
                     final pos = seatPositions[index];
-
-                    // Seat widget dimensions (approx)
-                    const seatWidth = 72.0;
-                    const seatHeight = 80.0;
 
                     return Positioned(
                       left: pos.dx - seatWidth / 2,
@@ -146,7 +159,8 @@ class _GameTableScreenState extends ConsumerState<GameTableScreen>
                       height: seatHeight,
                       child: PlayerSeat(
                         player: player,
-                        animationDelay: Duration(milliseconds: 100 + (index * 80)),
+                        animationDelay:
+                            Duration(milliseconds: 100 + (index * 80)),
                       ),
                     );
                   }),
@@ -154,34 +168,85 @@ class _GameTableScreenState extends ConsumerState<GameTableScreen>
               },
             ),
 
-            // ── 5. Top header bar ───────────────────────────────────────
+            // ── 5. Top swipe detection zone ─────────────────────────────
             Positioned(
-              top: 8,
-              left: 16,
-              right: 16,
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 44 + safePadding.top,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onVerticalDragEnd: (details) {
+                  if ((details.primaryVelocity ?? 0) > 0) {
+                    // Swiped downward → show top bar
+                    _topBarKey.currentState?.show();
+                  }
+                },
+              ),
+            ),
+
+            // ── 6. Top toolbar (auto-hide) ──────────────────────────────
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
               child: SafeArea(
-                child: TableHeader(
-                  roomCode: state.roomCode,
-                  currentRound: state.currentRound,
-                  totalRounds: state.totalRounds,
-                  totalPlayers: state.totalPlayers,
-                  onSettingsPressed: () {
-                    // Settings placeholder
-                  },
-                  onExitPressed: () {
-                    _showExitDialog(context);
-                  },
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: AutoHideBar(
+                    key: _topBarKey,
+                    direction: AxisDirection.up,
+                    child: TableHeader(
+                      roomCode: state.roomCode,
+                      currentRound: state.currentRound,
+                      totalRounds: state.totalRounds,
+                      totalPlayers: state.totalPlayers,
+                      onSettingsPressed: () {
+                        // Settings placeholder
+                      },
+                      onExitPressed: () {
+                        _showExitDialog(context);
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
 
-            // ── 6. Bottom controls ──────────────────────────────────────
+            // ── 7. Bottom swipe detection zone ──────────────────────────
             Positioned(
-              bottom: 8,
-              left: screenSize.width * 0.25,
-              right: screenSize.width * 0.25,
-              child: const SafeArea(
-                child: BottomControls(),
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 44 + safePadding.bottom,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onVerticalDragEnd: (details) {
+                  if ((details.primaryVelocity ?? 0) < 0) {
+                    // Swiped upward → show bottom bar
+                    _bottomBarKey.currentState?.show();
+                  }
+                },
+              ),
+            ),
+
+            // ── 8. Bottom controls (auto-hide) ─────────────────────────
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: AutoHideBar(
+                    key: _bottomBarKey,
+                    direction: AxisDirection.down,
+                    forceVisible: isMyTurn,
+                    child: const BottomControls(),
+                  ),
+                ),
               ),
             ),
           ],

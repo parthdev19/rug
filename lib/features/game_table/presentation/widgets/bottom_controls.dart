@@ -1,6 +1,7 @@
-/// Bottom action button placeholders for the current player.
+/// Bottom action button panel for the current player.
 ///
-/// Disabled buttons for Play Card, Pass, Ready, Leave Table.
+/// Compact, centered, with Play Card, Pass, Ready, Leave buttons.
+/// Wrapped by AutoHideBar in the parent screen.
 library;
 
 import 'dart:ui';
@@ -12,28 +13,35 @@ class BottomControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0C100E).withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: SplashAnimationConstants.gold.withValues(alpha: 0.1),
-              width: 0.8,
+    return Center(
+      child: IntrinsicWidth(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0C100E).withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: SplashAnimationConstants.gold.withValues(alpha: 0.12),
+                  width: 0.8,
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _ActionButton(label: 'Play Card', icon: Icons.style_rounded),
+                  SizedBox(width: 12),
+                  _ActionButton(label: 'Pass', icon: Icons.skip_next_rounded),
+                  SizedBox(width: 12),
+                  _ActionButton(label: 'Ready', icon: Icons.check_circle_outline_rounded),
+                  SizedBox(width: 12),
+                  _ActionButton(label: 'Leave', icon: Icons.exit_to_app_rounded, isDestructive: true),
+                ],
+              ),
             ),
-          ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _ActionButton(label: 'Play Card', icon: Icons.style_rounded),
-              _ActionButton(label: 'Pass', icon: Icons.skip_next_rounded),
-              _ActionButton(label: 'Ready', icon: Icons.check_circle_outline_rounded),
-              _ActionButton(label: 'Leave', icon: Icons.exit_to_app_rounded, isDestructive: true),
-            ],
           ),
         ),
       ),
@@ -55,26 +63,26 @@ class _ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isDestructive
-        ? const Color(0xFFDA3633).withValues(alpha: 0.4)
-        : SplashAnimationConstants.emerald.withValues(alpha: 0.4);
+        ? const Color(0xFFDA3633).withValues(alpha: 0.5)
+        : SplashAnimationConstants.emerald.withValues(alpha: 0.5);
 
     return Opacity(
-      opacity: 0.5,
+      opacity: 0.6,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: color.withValues(alpha: 0.2),
                 width: 0.8,
               ),
             ),
-            child: Icon(icon, color: color, size: 18),
+            child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(height: 3),
           Text(

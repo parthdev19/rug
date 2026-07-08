@@ -1,7 +1,7 @@
 /// Composite player seat widget positioned around the table.
 ///
-/// Shows avatar, username, status, dealer chip, card placeholder,
-/// and slide-in entrance animation.
+/// Shows avatar, username, status, dealer chip, and
+/// slide-in entrance animation. Turn glow is handled by [TurnIndicator].
 library;
 
 import 'package:flutter/material.dart';
@@ -74,10 +74,12 @@ class _PlayerSeatState extends State<PlayerSeat>
               children: [
                 TurnIndicator(
                   isActive: widget.player.isCurrentTurn,
-                  size: 52,
+                  size: 58,
+                  showBadge: widget.player.isCurrentTurn &&
+                      widget.player.isCurrentPlayer,
                   child: PlayerAvatar(
                     player: widget.player,
-                    size: 44,
+                    size: 48,
                   ),
                 ),
                 // Dealer chip

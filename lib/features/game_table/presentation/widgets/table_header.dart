@@ -1,6 +1,7 @@
-/// Top bar for the game table screen.
+/// Compact floating top bar for the game table screen.
 ///
 /// Displays room code, round count, player count, settings, and exit.
+/// Wrapped with IntrinsicWidth so it doesn't stretch full-width.
 library;
 
 import 'dart:ui';
@@ -28,96 +29,117 @@ class TableHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0C100E).withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: SplashAnimationConstants.gold.withValues(alpha: 0.12),
-              width: 0.8,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Room code
-              GestureDetector(
-                onTap: () {
-                  Clipboard.setData(ClipboardData(text: roomCode));
-                  HapticFeedback.lightImpact();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Room code copied!'),
-                      backgroundColor: SplashAnimationConstants.emerald.withValues(alpha: 0.8),
-                      duration: const Duration(seconds: 1),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.tag_rounded,
-                      color: SplashAnimationConstants.gold.withValues(alpha: 0.7),
-                      size: 14,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      roomCode,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.copy_rounded,
-                      color: Colors.white.withValues(alpha: 0.4),
-                      size: 12,
-                    ),
-                  ],
+    return Center(
+      child: IntrinsicWidth(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0C100E).withValues(alpha: 0.65),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: SplashAnimationConstants.gold.withValues(alpha: 0.12),
+                  width: 0.8,
                 ),
               ),
-
-              // Round indicator
-              _InfoChip(
-                icon: Icons.loop_rounded,
-                label: 'R$currentRound/$totalRounds',
-              ),
-
-              // Player count
-              _InfoChip(
-                icon: Icons.people_alt_outlined,
-                label: '$totalPlayers',
-              ),
-
-              // Settings + Exit
-              Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _HeaderButton(
-                    icon: Icons.settings_outlined,
-                    onPressed: onSettingsPressed,
+                  // Room code
+                  GestureDetector(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: roomCode));
+                      HapticFeedback.lightImpact();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Room code copied!'),
+                          backgroundColor: SplashAnimationConstants.emerald.withValues(alpha: 0.8),
+                          duration: const Duration(seconds: 1),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.tag_rounded,
+                          color: SplashAnimationConstants.gold.withValues(alpha: 0.7),
+                          size: 13,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          roomCode,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        const SizedBox(width: 3),
+                        Icon(
+                          Icons.copy_rounded,
+                          color: Colors.white.withValues(alpha: 0.35),
+                          size: 11,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  _HeaderButton(
-                    icon: Icons.exit_to_app_rounded,
-                    onPressed: onExitPressed,
-                    isDestructive: true,
+
+                  _divider(),
+
+                  // Round indicator
+                  _InfoChip(
+                    icon: Icons.loop_rounded,
+                    label: 'R$currentRound/$totalRounds',
+                  ),
+
+                  _divider(),
+
+                  // Player count
+                  _InfoChip(
+                    icon: Icons.people_alt_outlined,
+                    label: '$totalPlayers',
+                  ),
+
+                  _divider(),
+
+                  // Settings + Exit
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _HeaderButton(
+                        icon: Icons.settings_outlined,
+                        onPressed: onSettingsPressed,
+                      ),
+                      const SizedBox(width: 6),
+                      _HeaderButton(
+                        icon: Icons.exit_to_app_rounded,
+                        onPressed: onExitPressed,
+                        isDestructive: true,
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _divider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Container(
+        width: 1,
+        height: 16,
+        color: Colors.white.withValues(alpha: 0.08),
       ),
     );
   }
@@ -131,27 +153,20 @@ class _InfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: SplashAnimationConstants.gold, size: 12),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: SplashAnimationConstants.gold, size: 12),
+        const SizedBox(width: 3),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.8),
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -191,8 +206,8 @@ class _HeaderButtonState extends State<_HeaderButton> {
         scale: _scale,
         duration: const Duration(milliseconds: 100),
         child: Container(
-          width: 32,
-          height: 32,
+          width: 30,
+          height: 30,
           decoration: BoxDecoration(
             color: const Color(0xFF0C100E),
             shape: BoxShape.circle,
@@ -200,7 +215,7 @@ class _HeaderButtonState extends State<_HeaderButton> {
               color: color.withValues(alpha: 0.2),
             ),
           ),
-          child: Icon(widget.icon, color: color, size: 16),
+          child: Icon(widget.icon, color: color, size: 14),
         ),
       ),
     );
