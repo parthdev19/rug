@@ -1,9 +1,8 @@
 /// Premium landscape game table screen.
 ///
-/// Locks orientation to landscape on entry, restores portrait on exit.
-/// Renders a capsule (rounded-rectangle) felt table with dynamically
-/// positioned player seats, a center info panel, auto-hiding top toolbar,
-/// and auto-hiding bottom action controls with swipe-to-reveal gestures.
+/// Orchestrates all game phases: waiting → countdown → dealing → playing.
+/// Renders a casino-quality capsule table, dynamically positioned player seats,
+/// a menu icon with popup panel, and phase-specific overlays.
 library;
 
 import 'package:flutter/material.dart';
@@ -11,13 +10,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rug/features/game_table/controller/game_table_controller.dart';
-import 'package:rug/features/game_table/presentation/widgets/auto_hide_bar.dart';
+import 'package:rug/features/game_table/controller/game_table_state.dart';
 import 'package:rug/features/game_table/presentation/widgets/bottom_controls.dart';
+import 'package:rug/features/game_table/presentation/widgets/countdown_overlay.dart';
+import 'package:rug/features/game_table/presentation/widgets/deal_animation_overlay.dart';
+import 'package:rug/features/game_table/presentation/widgets/player_hand.dart';
 import 'package:rug/features/game_table/presentation/widgets/player_seat.dart';
 import 'package:rug/features/game_table/presentation/widgets/seat_layout_calculator.dart';
 import 'package:rug/features/game_table/presentation/widgets/table_center_info.dart';
 import 'package:rug/features/game_table/presentation/widgets/table_header.dart';
 import 'package:rug/features/game_table/presentation/widgets/table_surface.dart';
+import 'package:rug/features/game_table/presentation/widgets/waiting_panel.dart';
 import 'package:rug/features/splash/widgets/splash_animation_constants.dart';
 
 class GameTableScreen extends ConsumerStatefulWidget {
@@ -31,10 +34,6 @@ class _GameTableScreenState extends ConsumerState<GameTableScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
   late final Animation<double> _fadeAnimation;
-
-  // Auto-hide bar keys for programmatic control
-  final _topBarKey = GlobalKey<AutoHideBarState>();
-  final _bottomBarKey = GlobalKey<AutoHideBarState>();
 
   @override
   void initState() {
@@ -73,24 +72,24 @@ class _GameTableScreenState extends ConsumerState<GameTableScreen>
     super.dispose();
   }
 
-  /// Check if any player whose isCurrentPlayer=true also has isCurrentTurn=true.
-  bool _isLocalPlayerTurn() {
-    final state = ref.read(gameTableControllerProvider);
-    return state.players.any((p) => p.isCurrentPlayer && p.isCurrentTurn);
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(gameTableControllerProvider);
+    final notifier = ref.read(gameTableControllerProvider.notifier);
     final screenSize = MediaQuery.sizeOf(context);
-    final safePadding = MediaQuery.paddingOf(context);
-    final isMyTurn = _isLocalPlayerTurn();
 
     // Table proportions (matching TableSurface painter)
     final tableWidth = screenSize.width * 0.82;
     final tableHeight = screenSize.height * 0.67;
-    final cornerRadius = screenSize.height * 0.08;
     final tableCenter = Offset(screenSize.width / 2, screenSize.height / 2);
+
+    // Seat positions
+    final seatPositions = SeatLayoutCalculator.computeSeats(
+      center: tableCenter,
+      tableWidth: tableWidth,
+      tableHeight: tableHeight,
+      playerCount: state.players.length,
+    );
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -103,10 +102,10 @@ class _GameTableScreenState extends ConsumerState<GameTableScreen>
               child: Container(
                 decoration: const BoxDecoration(
                   gradient: RadialGradient(
-                    center: Alignment(0.0, 0.0),
+                    center: Alignment.center,
                     radius: 1.2,
                     colors: [
-                      Color(0xFF04180F), // Subtle emerald glow
+                      Color(0xFF04180F),
                       Color(0xFF020807),
                       Colors.black,
                     ],
@@ -121,132 +120,119 @@ class _GameTableScreenState extends ConsumerState<GameTableScreen>
               child: TableSurface(),
             ),
 
-            // ── 3. Center info ──────────────────────────────────────────
-            Center(
-              child: TableCenterInfo(
-                currentRound: state.currentRound,
-                totalRounds: state.totalRounds,
-                defaultPoints: state.defaultPoints,
-                gameStatus: state.gameStatus,
+            // ── 3. Center content (phase-dependent) ─────────────────────
+            if (state.gameStatus == GameStatus.waiting)
+              Center(
+                child: WaitingPanel(
+                  roomCode: state.roomCode,
+                  currentPlayers: state.players.length,
+                  totalPlayers: state.totalPlayers,
+                  currentRound: state.currentRound,
+                  defaultPoints: state.defaultPoints,
+                  isHost: state.isHost,
+                  onStartGame: () => notifier.startGame(),
+                ),
+              )
+            else if (state.gameStatus == GameStatus.playing)
+              Center(
+                child: TableCenterInfo(
+                  currentRound: state.currentRound,
+                  totalRounds: state.totalRounds,
+                  defaultPoints: state.defaultPoints,
+                  gameStatus: state.gameStatus,
+                ),
               ),
-            ),
 
             // ── 4. Player seats ─────────────────────────────────────────
-            LayoutBuilder(
-              builder: (context, constraints) {
-                // Seat positions along the table perimeter
-                final seatPositions = SeatLayoutCalculator.computeSeats(
-                  center: tableCenter,
-                  tableWidth: tableWidth,
-                  tableHeight: tableHeight,
-                  playerCount: state.players.length,
-                  cornerRadius: cornerRadius,
-                );
+            ...List.generate(state.players.length, (index) {
+              final player = state.players[index];
+              final pos = seatPositions[index];
 
-                // Seat widget dimensions
-                const seatWidth = 76.0;
-                const seatHeight = 96.0;
+              // Seat widget dimensions
+              const seatWidth = 80.0;
+              const seatHeight = 100.0;
 
-                return Stack(
-                  children: List.generate(state.players.length, (index) {
-                    final player = state.players[index];
-                    final pos = seatPositions[index];
-
-                    return Positioned(
-                      left: pos.dx - seatWidth / 2,
-                      top: pos.dy - seatHeight / 2,
-                      width: seatWidth,
-                      height: seatHeight,
-                      child: PlayerSeat(
-                        player: player,
-                        animationDelay:
-                            Duration(milliseconds: 100 + (index * 80)),
-                      ),
-                    );
-                  }),
-                );
-              },
-            ),
-
-            // ── 5. Top swipe detection zone ─────────────────────────────
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 44 + safePadding.top,
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onVerticalDragEnd: (details) {
-                  if ((details.primaryVelocity ?? 0) > 0) {
-                    // Swiped downward → show top bar
-                    _topBarKey.currentState?.show();
-                  }
-                },
-              ),
-            ),
-
-            // ── 6. Top toolbar (auto-hide) ──────────────────────────────
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: AutoHideBar(
-                    key: _topBarKey,
-                    direction: AxisDirection.up,
-                    child: TableHeader(
-                      roomCode: state.roomCode,
-                      currentRound: state.currentRound,
-                      totalRounds: state.totalRounds,
-                      totalPlayers: state.totalPlayers,
-                      onSettingsPressed: () {
-                        // Settings placeholder
-                      },
-                      onExitPressed: () {
-                        _showExitDialog(context);
-                      },
+              return Positioned(
+                left: pos.dx - seatWidth / 2,
+                top: pos.dy - seatHeight / 2,
+                width: seatWidth,
+                height: seatHeight,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    PlayerSeat(
+                      player: player,
+                      animationDelay:
+                          Duration(milliseconds: 100 + (index * 80)),
                     ),
+                    // Opponent card stack (during playing state)
+                    if (state.gameStatus == GameStatus.playing &&
+                        !player.isCurrentPlayer &&
+                        state.playerHands.isNotEmpty &&
+                        index < state.playerHands.length)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: OpponentCardStack(
+                          cardCount: state.playerHands[index].length,
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            }),
+
+            // ── 5. Countdown overlay ────────────────────────────────────
+            if (state.gameStatus == GameStatus.countdown)
+              Positioned.fill(
+                child: CountdownOverlay(value: state.countdownValue),
+              ),
+
+            // ── 6. Dealing animation ────────────────────────────────────
+            if (state.gameStatus == GameStatus.dealing)
+              Positioned.fill(
+                child: DealAnimationOverlay(
+                  playerCount: state.players.length,
+                  seatPositions: seatPositions,
+                  onComplete: () => notifier.onDealingComplete(),
+                ),
+              ),
+
+            // ── 7. Current player's hand (during playing) ───────────────
+            if (state.gameStatus == GameStatus.playing &&
+                state.playerHands.isNotEmpty)
+              Positioned(
+                bottom: 8,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: PlayerHandFan(
+                    cards: state.playerHands.isNotEmpty
+                        ? state.playerHands[0]
+                        : [],
                   ),
                 ),
               ),
-            ),
 
-            // ── 7. Bottom swipe detection zone ──────────────────────────
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 44 + safePadding.bottom,
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onVerticalDragEnd: (details) {
-                  if ((details.primaryVelocity ?? 0) < 0) {
-                    // Swiped upward → show bottom bar
-                    _bottomBarKey.currentState?.show();
-                  }
-                },
+            // ── 8. Bottom controls (playing state only) ─────────────────
+            if (state.gameStatus == GameStatus.playing)
+              const Positioned(
+                bottom: 76,
+                left: 0,
+                right: 0,
+                child: BottomControls(),
               ),
-            ),
 
-            // ── 8. Bottom controls (auto-hide) ─────────────────────────
+            // ── 9. Menu icon (always visible) ───────────────────────────
             Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: AutoHideBar(
-                    key: _bottomBarKey,
-                    direction: AxisDirection.down,
-                    forceVisible: isMyTurn,
-                    child: const BottomControls(),
-                  ),
-                ),
+              top: MediaQuery.paddingOf(context).top + 8,
+              left: 12,
+              child: TableMenuButton(
+                roomCode: state.roomCode,
+                currentRound: state.currentRound,
+                totalRounds: state.totalRounds,
+                totalPlayers: state.totalPlayers,
+                defaultPoints: state.defaultPoints,
+                onLeavePressed: () => _showExitDialog(context),
               ),
             ),
           ],

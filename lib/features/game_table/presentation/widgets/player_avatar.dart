@@ -1,4 +1,5 @@
-/// Circular player avatar with connection status indicator and turn highlight.
+/// Premium circular player avatar with gold border, emerald glow,
+/// and connection status indicator.
 library;
 
 import 'package:flutter/material.dart';
@@ -17,16 +18,10 @@ class PlayerAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = player.isCurrentTurn
-        ? SplashAnimationConstants.emerald
-        : player.isCurrentPlayer
-            ? SplashAnimationConstants.emerald.withValues(alpha: 0.5)
-            : SplashAnimationConstants.gold.withValues(alpha: 0.4);
-
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // Avatar circle
+        // Avatar circle with gold border + soft glow
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           width: size,
@@ -34,39 +29,47 @@ class PlayerAvatar extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: borderColor,
-              width: player.isCurrentTurn ? 2.5 : 1.5,
+              color: player.isCurrentTurn
+                  ? SplashAnimationConstants.emerald
+                  : SplashAnimationConstants.gold.withValues(alpha: 0.6),
+              width: player.isCurrentTurn ? 2.5 : 2.0,
             ),
             color: const Color(0xFF0C100E),
-            boxShadow: player.isCurrentTurn
-                ? [
-                    BoxShadow(
-                      color: SplashAnimationConstants.emerald.withValues(alpha: 0.25),
-                      blurRadius: 12,
-                      spreadRadius: 2,
-                    ),
-                  ]
-                : null,
+            boxShadow: [
+              // Soft emerald ambient glow on all avatars
+              BoxShadow(
+                color: SplashAnimationConstants.emerald.withValues(
+                  alpha: player.isCurrentTurn ? 0.3 : 0.06,
+                ),
+                blurRadius: player.isCurrentTurn ? 14 : 6,
+                spreadRadius: player.isCurrentTurn ? 2 : 0,
+              ),
+              // Subtle gold rim glow
+              BoxShadow(
+                color: SplashAnimationConstants.gold.withValues(alpha: 0.08),
+                blurRadius: 4,
+              ),
+            ],
           ),
           child: Center(
             child: player.avatarUrl != null
                 ? ClipOval(
                     child: Image.network(
                       player.avatarUrl!,
-                      width: size - 4,
-                      height: size - 4,
+                      width: size - 6,
+                      height: size - 6,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _buildInitials(),
+                      errorBuilder: (context, error, stackTrace) => _buildInitials(),
                     ),
                   )
                 : _buildInitials(),
           ),
         ),
 
-        // Connection status indicator
+        // Online status indicator
         Positioned(
-          right: -1,
-          bottom: -1,
+          right: 0,
+          bottom: 0,
           child: Container(
             width: 12,
             height: 12,
@@ -74,6 +77,12 @@ class PlayerAvatar extends StatelessWidget {
               shape: BoxShape.circle,
               color: _connectionColor,
               border: Border.all(color: const Color(0xFF0C100E), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: _connectionColor.withValues(alpha: 0.4),
+                  blurRadius: 3,
+                ),
+              ],
             ),
           ),
         ),
@@ -92,7 +101,7 @@ class PlayerAvatar extends StatelessWidget {
         color: player.isCurrentPlayer
             ? SplashAnimationConstants.emerald
             : SplashAnimationConstants.gold,
-        fontSize: size * 0.38,
+        fontSize: size * 0.36,
         fontWeight: FontWeight.w900,
       ),
     );

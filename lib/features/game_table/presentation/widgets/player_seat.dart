@@ -82,25 +82,32 @@ class _PlayerSeatState extends State<PlayerSeat>
                     size: 48,
                   ),
                 ),
-                // Dealer chip
+                // Dealer chip — positioned to avoid avatar overlap
                 if (widget.player.isDealer)
                   Positioned(
-                    top: -4,
-                    right: -4,
+                    top: -2,
+                    right: -10,
                     child: Container(
-                      width: 18,
-                      height: 18,
+                      width: 20,
+                      height: 20,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: SplashAnimationConstants.gold,
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            SplashAnimationConstants.brightGold,
+                            SplashAnimationConstants.gold,
+                          ],
+                        ),
                         border: Border.all(
                           color: const Color(0xFF0C100E),
                           width: 2,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: SplashAnimationConstants.gold.withValues(alpha: 0.3),
-                            blurRadius: 4,
+                            color: SplashAnimationConstants.gold.withValues(alpha: 0.4),
+                            blurRadius: 6,
                           ),
                         ],
                       ),
@@ -118,18 +125,24 @@ class _PlayerSeatState extends State<PlayerSeat>
                   ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 5),
 
-            // Username
+            // Username with text shadow for readability
             Text(
               widget.player.isCurrentPlayer ? 'You' : widget.player.username,
               style: TextStyle(
                 color: widget.player.isCurrentPlayer
                     ? SplashAnimationConstants.emerald
                     : Colors.white,
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.3,
+                shadows: const [
+                  Shadow(
+                    color: Color(0xCC000000),
+                    blurRadius: 4,
+                  ),
+                ],
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -138,7 +151,7 @@ class _PlayerSeatState extends State<PlayerSeat>
             // Status badge
             const SizedBox(height: 2),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
               decoration: BoxDecoration(
                 color: _statusColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(6),

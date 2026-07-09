@@ -165,6 +165,8 @@ class TableCenterInfo extends StatelessWidget {
   String get _statusText {
     return switch (gameStatus) {
       GameStatus.waiting => 'WAITING FOR PLAYERS',
+      GameStatus.countdown => 'GET READY',
+      GameStatus.dealing => 'DEALING CARDS',
       GameStatus.playing => 'GAME IN PROGRESS',
       GameStatus.paused => 'PAUSED',
       GameStatus.finished => 'GAME OVER',
@@ -174,6 +176,8 @@ class TableCenterInfo extends StatelessWidget {
   Color get _statusColor {
     return switch (gameStatus) {
       GameStatus.waiting => SplashAnimationConstants.gold,
+      GameStatus.countdown => SplashAnimationConstants.gold,
+      GameStatus.dealing => SplashAnimationConstants.emerald,
       GameStatus.playing => SplashAnimationConstants.emerald,
       GameStatus.paused => const Color(0xFFD29922),
       GameStatus.finished => const Color(0xFFDA3633),

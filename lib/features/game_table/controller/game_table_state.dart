@@ -1,21 +1,30 @@
 /// State class representing the game table's current state.
+///
+/// Tracks game phases from waiting → countdown → dealing → playing → finished.
 library;
 
+import 'package:rug/features/game_table/models/card_model.dart';
 import 'package:rug/features/game_table/models/player_seat_model.dart';
 
 /// The overall status of the game.
-enum GameStatus { waiting, playing, paused, finished }
+enum GameStatus { waiting, countdown, dealing, playing, paused, finished }
 
 class GameTableState {
   const GameTableState({
     this.roomCode = '',
     this.players = const [],
-    this.totalPlayers = 4,
+    this.totalPlayers = 5,
     this.currentRound = 1,
     this.totalRounds = 5,
     this.defaultPoints = 100,
     this.gameStatus = GameStatus.waiting,
     this.currentTurnIndex = 0,
+    this.isHost = true,
+    this.countdownValue = 3,
+    this.playerHands = const [],
+    this.drawPile = const [],
+    this.dealerIndex = 0,
+    this.dealingComplete = false,
   });
 
   final String roomCode;
@@ -26,6 +35,12 @@ class GameTableState {
   final int defaultPoints;
   final GameStatus gameStatus;
   final int currentTurnIndex;
+  final bool isHost;
+  final int countdownValue;
+  final List<List<PlayingCard>> playerHands;
+  final List<PlayingCard> drawPile;
+  final int dealerIndex;
+  final bool dealingComplete;
 
   GameTableState copyWith({
     String? roomCode,
@@ -36,6 +51,12 @@ class GameTableState {
     int? defaultPoints,
     GameStatus? gameStatus,
     int? currentTurnIndex,
+    bool? isHost,
+    int? countdownValue,
+    List<List<PlayingCard>>? playerHands,
+    List<PlayingCard>? drawPile,
+    int? dealerIndex,
+    bool? dealingComplete,
   }) {
     return GameTableState(
       roomCode: roomCode ?? this.roomCode,
@@ -46,6 +67,12 @@ class GameTableState {
       defaultPoints: defaultPoints ?? this.defaultPoints,
       gameStatus: gameStatus ?? this.gameStatus,
       currentTurnIndex: currentTurnIndex ?? this.currentTurnIndex,
+      isHost: isHost ?? this.isHost,
+      countdownValue: countdownValue ?? this.countdownValue,
+      playerHands: playerHands ?? this.playerHands,
+      drawPile: drawPile ?? this.drawPile,
+      dealerIndex: dealerIndex ?? this.dealerIndex,
+      dealingComplete: dealingComplete ?? this.dealingComplete,
     );
   }
 }
