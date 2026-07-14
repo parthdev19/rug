@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rug/features/create_game/controller/create_game_controller.dart';
-import 'package:rug/features/create_game/controller/create_game_state.dart';
 
 void main() {
   group('CreateGameController Tests', () {
@@ -21,21 +20,21 @@ void main() {
 
     test('initial state has correct default configurations', () {
       final state = container.read(createGameControllerProvider);
-      expect(state.totalPlayers, 4);
+      expect(state.totalPlayers, 5);
       expect(state.defaultPoints, 100);
       expect(state.totalRounds, 5);
       expect(state.isValid, true);
     });
 
-    test('incrementPlayers and decrementPlayers respect limits (4 to 9)', () {
+    test('incrementPlayers and decrementPlayers respect limits (5 to 9)', () {
       final notifier = container.read(createGameControllerProvider.notifier);
 
-      // Decrement below min (4)
+      // Decrement below min (5)
       notifier.decrementPlayers();
-      expect(container.read(createGameControllerProvider).totalPlayers, 4);
+      expect(container.read(createGameControllerProvider).totalPlayers, 5);
 
       // Increment step-by-step to max (9)
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < 4; i++) {
         notifier.incrementPlayers();
       }
       expect(container.read(createGameControllerProvider).totalPlayers, 9);

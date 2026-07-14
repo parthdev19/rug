@@ -87,6 +87,30 @@ class SecureStorageService {
     await prefs.setBool(StorageKeys.isFirstLaunch, false);
   }
 
+  /// Checks if device info has been sent at least once.
+  Future<bool> hasSentDeviceInfo() async {
+    final prefs = await _preferences;
+    return prefs.getBool(StorageKeys.hasSentDeviceInfo) ?? false;
+  }
+
+  /// Sets whether device info has been sent.
+  Future<void> setSentDeviceInfo(bool value) async {
+    final prefs = await _preferences;
+    await prefs.setBool(StorageKeys.hasSentDeviceInfo, value);
+  }
+
+  /// Retrieves the stored install version.
+  Future<String?> getInstallVersion() async {
+    final prefs = await _preferences;
+    return prefs.getString(StorageKeys.installVersion);
+  }
+
+  /// Saves the install version.
+  Future<void> saveInstallVersion(String version) async {
+    final prefs = await _preferences;
+    await prefs.setString(StorageKeys.installVersion, version);
+  }
+
   // === Cleanup ===
 
   /// Clears all auth-related data (for logout).

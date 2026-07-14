@@ -1,0 +1,192 @@
+/// Service for retrieving device and package info and submitting it to the server.
+library;
+
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:rug/core/constants/api_constants.dart';
+import 'package:rug/services/logging/app_logger.dart';
+import 'package:rug/services/network/dio_client.dart';
+import 'package:rug/services/storage/secure_storage_service.dart';
+
+class DeviceInfoService {
+  DeviceInfoService._();
+
+  static final DeviceInfoService instance = DeviceInfoService._();
+
+  final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
+  final Dio _dio = DioClient.instance;
+
+  /// Exposed for testing.
+  @visibleForTesting
+  Dio get dio => _dio;
+
+  /// Fetches device info and makes the API call.
+  Future<void> sendDeviceInfo() async {
+    try {
+      final secureStorage = SecureStorageService.instance;
+      final sentOnce = await secureStorage.hasSentDeviceInfo();
+
+      // Get app version info
+      final packageInfo = await PackageInfo.fromPlatform();
+      final currentVersion = packageInfo.version;
+
+      // Get or save install version
+      String? installVersion = await secureStorage.getInstallVersion();
+      if (installVersion == null) {
+        installVersion = currentVersion;
+        await secureStorage.saveInstallVersion(currentVersion);
+      }
+
+      Map<String, dynamic> payload;
+
+      if (!sentOnce) {
+        // Fetch full device details
+        final deviceDetails = await _getDeviceDetails();
+        final deviceType = _getDeviceType();
+        final language = _getLanguage();
+        final timezoneName = DateTime.now().timeZoneName;
+        final timezoneOffset = _getTimezoneOffset();
+
+        payload = {
+          'device_id': deviceDetails['device_id'],
+          'device_type': deviceType,
+          'lat': 0,
+          'long': 0,
+          'language': language,
+          'timezone_name': timezoneName,
+          'timezone_offset': timezoneOffset,
+          'current_version': currentVersion,
+          'install_version': installVersion,
+          'device_name': deviceDetails['device_name'],
+        };
+      } else {
+        // Subsequent launch: only send lat, long, current_version, install_version
+        payload = {
+          'lat': 0,
+          'long': 0,
+          'current_version': currentVersion,
+          'install_version': installVersion,
+        };
+      }
+
+      AppLogger.info('Sending device info (first_time: ${!sentOnce}) to API');
+      AppLogger.debug('Device info payload: $payload');
+
+      final response = await _dio.post(
+        ApiConstants.deviceInfo,
+        data: payload,
+        options: Options(
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      // Check for success: status code 200 or 201, or custom response key success = true
+      final responseData = response.data;
+      bool isSuccess = response.statusCode == 200 || response.statusCode == 201;
+      
+      if (responseData is Map<String, dynamic>) {
+        if (responseData.containsKey('success')) {
+          isSuccess = responseData['success'] == true;
+        }
+      }
+
+      if (isSuccess) {
+        AppLogger.info('Device info updated successfully');
+        if (!sentOnce) {
+          await secureStorage.setSentDeviceInfo(true);
+        }
+      } else {
+        AppLogger.warning(
+          'Failed to update device info. Status code: ${response.statusCode}, response: $responseData',
+        );
+      }
+    } catch (e) {
+      AppLogger.error('Error sending device info', error: e);
+    }
+  }
+
+  /// Get device ID and device name depending on platform.
+  Future<Map<String, String>> _getDeviceDetails() async {
+    String deviceId = 'unknown_id';
+    String deviceName = 'unknown_device';
+
+    try {
+      if (kIsWeb) {
+        final webInfo = await _deviceInfo.webBrowserInfo;
+        deviceId = webInfo.userAgent ?? 'web_user_agent';
+        deviceName = webInfo.browserName.toString();
+      } else if (Platform.isAndroid) {
+        final androidInfo = await _deviceInfo.androidInfo;
+        deviceId = androidInfo.id;
+        deviceName = '${androidInfo.brand} ${androidInfo.model}';
+      } else if (Platform.isIOS) {
+        final iosInfo = await _deviceInfo.iosInfo;
+        deviceId = iosInfo.identifierForVendor ?? 'unknown_ios_id';
+        deviceName = iosInfo.name;
+      } else if (Platform.isMacOS) {
+        final macInfo = await _deviceInfo.macOsInfo;
+        deviceId = macInfo.systemGUID ?? 'unknown_mac_GUID';
+        deviceName = macInfo.computerName;
+      } else if (Platform.isLinux) {
+        final linuxInfo = await _deviceInfo.linuxInfo;
+        deviceId = linuxInfo.machineId ?? 'unknown_linux_id';
+        deviceName = linuxInfo.name;
+      } else if (Platform.isWindows) {
+        final windowsInfo = await _deviceInfo.windowsInfo;
+        deviceId = windowsInfo.deviceId;
+        deviceName = windowsInfo.computerName;
+      }
+    } catch (e) {
+      AppLogger.error('Failed to get platform device details', error: e);
+    }
+
+    return {
+      'device_id': deviceId,
+      'device_name': deviceName,
+    };
+  }
+
+  /// Get simplified device type.
+  String _getDeviceType() {
+    if (kIsWeb) return 'web';
+    if (Platform.isIOS) return 'ios';
+    if (Platform.isAndroid) return 'android';
+    if (Platform.isMacOS) return 'macos';
+    if (Platform.isLinux) return 'linux';
+    if (Platform.isWindows) return 'windows';
+    return 'unknown';
+  }
+
+  /// Get simplified locale language.
+  String _getLanguage() {
+    try {
+      if (kIsWeb) return 'en';
+      final locale = Platform.localeName;
+      if (locale.contains('_') || locale.contains('-')) {
+        return locale.split(RegExp(r'[-_]'))[0];
+      }
+      return locale.isNotEmpty ? locale : 'en';
+    } catch (_) {
+      return 'en';
+    }
+  }
+
+  /// Format timezone offset as +/-HH:MM
+  String _getTimezoneOffset() {
+    try {
+      final offset = DateTime.now().timeZoneOffset;
+      final hours = offset.inHours.abs().toString().padLeft(2, '0');
+      final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
+      final sign = offset.isNegative ? '-' : '+';
+      return '$sign$hours:$minutes';
+    } catch (_) {
+      return '+00:00';
+    }
+  }
+}
