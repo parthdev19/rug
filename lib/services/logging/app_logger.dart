@@ -9,8 +9,9 @@ import 'package:logger/logger.dart';
 class AppLogger {
   AppLogger._();
 
-  static late final Logger _logger;
+  static Logger? _logger;
   static bool _enabled = true;
+  static bool _isInitialized = false;
 
   /// Initialize the logger.
   static void init({bool enableLogging = true}) {
@@ -23,21 +24,29 @@ class AppLogger {
       ),
       level: enableLogging ? Level.debug : Level.off,
     );
+    _isInitialized = true;
+  }
+
+  static Logger get logger {
+    if (!_isInitialized || _logger == null) {
+      init(enableLogging: false);
+    }
+    return _logger!;
   }
 
   /// Log a debug message.
   static void debug(dynamic message) {
-    if (_enabled) _logger.d(message);
+    if (_enabled) logger.d(message);
   }
 
   /// Log an info message.
   static void info(dynamic message) {
-    if (_enabled) _logger.i(message);
+    if (_enabled) logger.i(message);
   }
 
   /// Log a warning message.
   static void warning(dynamic message) {
-    if (_enabled) _logger.w(message);
+    if (_enabled) logger.w(message);
   }
 
   /// Log an error message.
@@ -46,7 +55,7 @@ class AppLogger {
     Object? error,
     StackTrace? stackTrace,
   }) {
-    if (_enabled) _logger.e(message, error: error, stackTrace: stackTrace);
+    if (_enabled) logger.e(message, error: error, stackTrace: stackTrace);
   }
 
   /// Log a fatal/critical message.
@@ -56,14 +65,14 @@ class AppLogger {
     StackTrace? stackTrace,
   }) {
     // Always log fatal errors regardless of environment
-    _logger.f(message, error: error, stackTrace: stackTrace);
+    logger.f(message, error: error, stackTrace: stackTrace);
   }
 
   /// Log network request/response.
   static void network(String method, String url, {int? statusCode}) {
     if (_enabled) {
       final status = statusCode != null ? ' [$statusCode]' : '';
-      _logger.d('🌐 $method $url$status');
+      logger.d('🌐 $method $url$status');
     }
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rug/features/create_game/controller/create_game_controller.dart';
@@ -35,7 +33,6 @@ void main() {
     test('initial state matches CreateGameController configurations', () {
       // Configure 6 players, 120 points, 8 rounds
       final createGameNotifier = container.read(createGameControllerProvider.notifier);
-      createGameNotifier.incrementPlayers(); // 4 -> 5
       createGameNotifier.incrementPlayers(); // 5 -> 6
       createGameNotifier.incrementPoints();  // 100 -> 105
       createGameNotifier.incrementRounds();  // 5 -> 6
@@ -60,7 +57,7 @@ void main() {
       expect(localPlayer.username, 'TestHost');
       expect(localPlayer.seatIndex, 0);
       expect(localPlayer.isCurrentPlayer, true);
-      expect(localPlayer.status, PlayerStatus.ready);
+      expect(localPlayer.status, PlayerStatus.waiting);
       expect(localPlayer.connectionStatus, ConnectionStatus.online);
     });
 
@@ -79,45 +76,40 @@ void main() {
     test('toggleReady modifies local player status', () {
       final notifier = container.read(gameTableControllerProvider.notifier);
       
-      // Initial is ready
-      expect(container.read(gameTableControllerProvider).players[0].status, PlayerStatus.ready);
-
-      // Toggle to waiting
-      notifier.toggleReady();
+      // Initial is waiting
       expect(container.read(gameTableControllerProvider).players[0].status, PlayerStatus.waiting);
 
-      // Toggle back to ready
+      // Toggle to ready
       notifier.toggleReady();
       expect(container.read(gameTableControllerProvider).players[0].status, PlayerStatus.ready);
+
+      // Toggle back to waiting
+      notifier.toggleReady();
+      expect(container.read(gameTableControllerProvider).players[0].status, PlayerStatus.waiting);
     });
 
     test('SeatLayoutCalculator computes expected coordinates with player 0 at bottom center', () {
       const center = Offset(400, 300);
-      const radiusX = 200.0;
-      const radiusY = 150.0;
-      const playerCount = 4;
+      const tableWidth = 400.0;
+      const tableHeight = 300.0;
+      const playerCount = 6;
 
       final seats = SeatLayoutCalculator.computeSeats(
         center: center,
-        radiusX: radiusX,
-        radiusY: radiusY,
+        tableWidth: tableWidth,
+        tableHeight: tableHeight,
         playerCount: playerCount,
       );
 
-      expect(seats.length, 4);
+      expect(seats.length, 6);
 
-      // Seat 0 (bottom center): angle = pi/2 -> cos(pi/2) = 0, sin(pi/2) = 1
-      // x = center.dx + 0 = 400
-      // y = center.dy + radiusY = 300 + 150 = 450
+      // Seat 0 (Bottom Center): pos(0.0, 1.0) -> (400, 300 + 150) = (400, 450)
       expect(seats[0].dx, closeTo(400.0, 0.001));
       expect(seats[0].dy, closeTo(450.0, 0.001));
 
-      // Seat 1: angle = pi/2 + 2*pi/4 = pi/2 + pi = 3*pi/2 (top center)
-      // cos(3*pi/2) = 0, sin(3*pi/2) = -1
-      // x = 400
-      // y = 300 - 150 = 150
-      expect(seats[2].dx, closeTo(400.0, 0.001));
-      expect(seats[2].dy, closeTo(150.0, 0.001));
+      // Seat 5 (Left Center): pos(-1.0, 0.0) -> (400 - 200, 300) = (200, 300)
+      expect(seats[5].dx, closeTo(200.0, 0.001));
+      expect(seats[5].dy, closeTo(300.0, 0.001));
     });
   });
 }

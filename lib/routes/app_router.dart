@@ -19,6 +19,7 @@ import 'package:rug/features/create_game/presentation/create_game_screen.dart';
 import 'package:rug/features/game_table/presentation/game_table_screen.dart';
 import 'package:rug/features/splash/presentation/splash_screen.dart';
 import 'package:rug/routes/route_names.dart';
+import 'package:rug/services/device/screen_tracker_service.dart';
 import 'package:rug/shared/providers/common_providers.dart';
 
 /// GoRouter provider — reads auth state for redirects.
@@ -28,6 +29,11 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: RouteNames.splash,
     debugLogDiagnostics: true,
+    observers: [
+      ScreenTrackerObserver(
+        readUserId: () => ref.read(currentUserIdProvider),
+      ),
+    ],
     redirect: (context, state) {
       final currentPath = state.uri.path;
       final isOnAuth = currentPath.startsWith(RouteNames.auth);
@@ -379,5 +385,133 @@ class _PlaceholderScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// NavigatorObserver that monitors and logs user screen entries to the backend API.
+class ScreenTrackerObserver extends NavigatorObserver {
+  ScreenTrackerObserver({required this.readUserId});
+
+  final String? Function() readUserId;
+  String? _lastScreen;
+  bool _isInGame = false;
+
+  // List of route names representing the main active game screen
+  static const _gameRoutes = {
+    'gameTable',
+    'multiplayerTable',
+    'onlineMatch',
+  };
+
+  // Top-level non-game route names that signify returning from the game
+  static const _nonGameRoutes = {
+    'splash',
+    'auth',
+    'login',
+    'register',
+    'forgotPassword',
+    'verifyOtp',
+    'resetPassword',
+    'guestUsername',
+    'home',
+    'profile',
+    'settings',
+    'createGame',
+    'friends',
+    'leaderboard',
+    'rewards',
+    'wallet',
+    'notifications',
+  };
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPush(route, previousRoute);
+    _processRoute(route);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPop(route, previousRoute);
+    if (previousRoute != null) {
+      _processRoute(previousRoute);
+    }
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    if (newRoute != null) {
+      _processRoute(newRoute);
+    }
+  }
+
+  void _processRoute(Route<dynamic> route) {
+    final routeName = route.settings.name;
+    if (routeName == null || routeName.isEmpty) return;
+
+    final formattedName = _formatScreenName(routeName);
+    final isGameScreen = _gameRoutes.contains(routeName);
+
+    if (isGameScreen) {
+      if (!_isInGame) {
+        _isInGame = true;
+        _sendScreenTrack(formattedName);
+      }
+    } else {
+      if (_isInGame) {
+        if (_nonGameRoutes.contains(routeName)) {
+          _isInGame = false;
+          if (_lastScreen != formattedName) {
+            _sendScreenTrack(formattedName);
+          }
+        }
+      } else {
+        if (_lastScreen != formattedName) {
+          _sendScreenTrack(formattedName);
+        }
+      }
+    }
+  }
+
+  void _sendScreenTrack(String formattedName) {
+    _lastScreen = formattedName;
+    final userId = readUserId();
+    ScreenTrackerService.instance.trackScreen(formattedName, userId: userId);
+  }
+
+  String _formatScreenName(String name) {
+    switch (name) {
+      case 'forgotPassword':
+        return 'forgot_password_screen';
+      case 'verifyOtp':
+        return 'verify_otp_screen';
+      case 'resetPassword':
+        return 'reset_password_screen';
+      case 'guestUsername':
+        return 'guest_username_screen';
+      case 'createGame':
+        return 'create_game_screen';
+      case 'gameTable':
+        return 'game_table_screen';
+      case 'gameLobby':
+        return 'game_lobby_screen';
+      case 'privateRoom':
+        return 'private_room_screen';
+      case 'multiplayerTable':
+        return 'multiplayer_table_screen';
+      case 'onlineMatch':
+        return 'online_match_screen';
+      default:
+        // Convert camelCase to snake_case and append _screen
+        final regex = RegExp(r'(?<=[a-z])[A-Z]');
+        String snake = name
+            .replaceAllMapped(regex, (m) => '_${m.group(0)!.toLowerCase()}')
+            .toLowerCase();
+        if (!snake.endsWith('_screen')) {
+          snake = '${snake}_screen';
+        }
+        return snake;
+    }
   }
 }

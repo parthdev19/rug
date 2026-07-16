@@ -26,4 +26,6 @@ class StorageKeys {
   static const String languageCode = 'language_code';
   static const String lastSyncTimestamp = 'last_sync_timestamp';
   static const String pushNotificationToken = 'push_notification_token';
+  static const String hasSentDeviceInfo = 'has_sent_device_info';
+  static const String installVersion = 'install_version';
 }

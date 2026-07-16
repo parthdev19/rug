@@ -7,7 +7,7 @@ class ApiConstants {
   ApiConstants._();
 
   // Base URLs — overridden per environment via EnvConfig
-  static const String devBaseUrl = 'https://dev-api.rug.game';
+  static const String devBaseUrl = 'https://g66p29zh-1902.inc1.devtunnels.ms';
   static const String stagingBaseUrl = 'https://staging-api.rug.game';
   static const String prodBaseUrl = 'https://api.rug.game';
 
@@ -23,6 +23,8 @@ class ApiConstants {
   static const String login = '$apiVersion/auth/login';
   static const String register = '$apiVersion/auth/register';
   static const String refreshToken = '$apiVersion/auth/refresh';
+  static const String deviceInfo = '/v1/app/auth/device-info';
+  static const String screenInfo = '/v1/app/auth/screen-info';
   static const String logout = '$apiVersion/auth/logout';
 
   // User Endpoints
