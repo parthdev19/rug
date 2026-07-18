@@ -6,6 +6,8 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:android_id/android_id.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:rug/core/constants/api_constants.dart';
 import 'package:rug/services/logging/app_logger.dart';
 import 'package:rug/services/network/dio_client.dart';
@@ -40,6 +42,11 @@ class DeviceInfoService {
         await secureStorage.saveInstallVersion(currentVersion);
       }
 
+      // Get location coordinates (ask permission if it's the first time)
+      final position = await _getCurrentLocation(requestPermission: !sentOnce);
+      final lat = position?.latitude ?? 0.0;
+      final long = position?.longitude ?? 0.0;
+
       Map<String, dynamic> payload;
 
       if (!sentOnce) {
@@ -53,8 +60,8 @@ class DeviceInfoService {
         payload = {
           'device_id': deviceDetails['device_id'],
           'device_type': deviceType,
-          'lat': 0,
-          'long': 0,
+          'lat': lat,
+          'long': long,
           'language': language,
           'timezone_name': timezoneName,
           'timezone_offset': timezoneOffset,
@@ -63,10 +70,12 @@ class DeviceInfoService {
           'device_name': deviceDetails['device_name'],
         };
       } else {
-        // Subsequent launch: only send lat, long, current_version, install_version
+        // Subsequent launch: only send device_id, lat, long, current_version, install_version
+        final deviceDetails = await _getDeviceDetails();
         payload = {
-          'lat': 0,
-          'long': 0,
+          'device_id': deviceDetails['device_id'],
+          'lat': lat,
+          'long': long,
           'current_version': currentVersion,
           'install_version': installVersion,
         };
@@ -111,6 +120,46 @@ class DeviceInfoService {
     }
   }
 
+  /// Request permission and fetch current GPS coordinates.
+  Future<Position?> _getCurrentLocation({required bool requestPermission}) async {
+    try {
+      if (kIsWeb) return null;
+      if (kDebugMode && Platform.environment.containsKey('FLUTTER_TEST')) {
+        return null;
+      }
+
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return null;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        if (requestPermission) {
+          permission = await Geolocator.requestPermission();
+          if (permission == LocationPermission.denied) {
+            return null;
+          }
+        } else {
+          return null;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        return null;
+      }
+
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          timeLimit: Duration(seconds: 5),
+        ),
+      );
+    } catch (e) {
+      AppLogger.warning('Failed to fetch location coordinates: $e');
+      return null;
+    }
+  }
+
   /// Get device ID and device name depending on platform.
   Future<Map<String, String>> _getDeviceDetails() async {
     String deviceId = 'unknown_id';
@@ -122,8 +171,9 @@ class DeviceInfoService {
         deviceId = webInfo.userAgent ?? 'web_user_agent';
         deviceName = webInfo.browserName.toString();
       } else if (Platform.isAndroid) {
+        const androidIdPlugin = AndroidId();
+        deviceId = await androidIdPlugin.getId() ?? 'unknown_android_id';
         final androidInfo = await _deviceInfo.androidInfo;
-        deviceId = androidInfo.id;
         deviceName = '${androidInfo.brand} ${androidInfo.model}';
       } else if (Platform.isIOS) {
         final iosInfo = await _deviceInfo.iosInfo;
@@ -177,16 +227,16 @@ class DeviceInfoService {
     }
   }
 
-  /// Format timezone offset as +/-HH:MM
+  /// Format timezone offset as GMT+/-HH:MM
   String _getTimezoneOffset() {
     try {
       final offset = DateTime.now().timeZoneOffset;
       final hours = offset.inHours.abs().toString().padLeft(2, '0');
       final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
       final sign = offset.isNegative ? '-' : '+';
-      return '$sign$hours:$minutes';
+      return 'GMT$sign$hours:$minutes';
     } catch (_) {
-      return '+00:00';
+      return 'GMT+00:00';
     }
   }
 }

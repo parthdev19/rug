@@ -4,6 +4,7 @@
 /// flutter_secure_storage for production encryption.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rug/core/constants/storage_keys.dart';
 import 'package:rug/services/logging/app_logger.dart';
@@ -19,6 +20,10 @@ class SecureStorageService {
     _prefs ??= await SharedPreferences.getInstance();
     return _prefs!;
   }
+
+  /// Resets the cached [SharedPreferences] instance — for use in tests only.
+  @visibleForTesting
+  void resetForTesting() => _prefs = null;
 
   // === Token Management ===
 

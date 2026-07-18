@@ -99,11 +99,11 @@ void main() {
       final data = mockAdapter.lastRequestOptions!.data as Map<String, dynamic>;
       expect(data.containsKey('device_id'), true);
       expect(data.containsKey('device_type'), true);
-      expect(data['lat'], 0);
-      expect(data['long'], 0);
+      expect(data['lat'], 0.0);
+      expect(data['long'], 0.0);
       expect(data.containsKey('language'), true);
       expect(data.containsKey('timezone_name'), true);
-      expect(data.containsKey('timezone_offset'), true);
+      expect(data['timezone_offset'].toString().startsWith('GMT'), true);
       expect(data['current_version'], '1.0.0');
       expect(data['install_version'], '1.0.0');
       expect(data.containsKey('device_name'), true);
@@ -113,7 +113,7 @@ void main() {
       expect(await secureStorage.getInstallVersion(), '1.0.0');
     });
 
-    test('Subsequent launch sends only 4 keys', () async {
+    test('Subsequent launch sends 5 keys (including device_id)', () async {
       // Pre-set that device info has been sent and install version is 0.9.0
       await secureStorage.setSentDeviceInfo(true);
       await secureStorage.saveInstallVersion('0.9.0');
@@ -132,14 +132,14 @@ void main() {
       expect(mockAdapter.lastRequestOptions, isNotNull);
       final data = mockAdapter.lastRequestOptions!.data as Map<String, dynamic>;
       
-      // Should only contain the 4 keys: lat, long, current_version, install_version
-      expect(data.length, 4);
-      expect(data['lat'], 0);
-      expect(data['long'], 0);
+      // Should contain 5 keys: device_id, lat, long, current_version, install_version
+      expect(data.length, 5);
+      expect(data['device_id'], 'unknown_id');
+      expect(data['lat'], 0.0);
+      expect(data['long'], 0.0);
       expect(data['current_version'], '1.0.0');
       expect(data['install_version'], '0.9.0');
 
-      expect(data.containsKey('device_id'), false);
       expect(data.containsKey('device_type'), false);
       expect(data.containsKey('device_name'), false);
     });

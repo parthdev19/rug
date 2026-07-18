@@ -74,5 +74,9 @@
 		<string>This app needs access to your camera to capture your profile photo.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>This app needs access to your photo library to select your profile photo.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>This app needs access to your location to update your device profile.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>This app needs access to your location to update your device profile.</string>
 	</dict>
 </plist>

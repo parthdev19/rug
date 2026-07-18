@@ -11,6 +11,7 @@ import 'package:rug/features/splash/widgets/particle_background.dart';
 import 'package:rug/features/splash/widgets/splash_animation_constants.dart';
 import 'package:rug/features/splash/widgets/splash_logo.dart';
 import 'package:rug/routes/route_names.dart';
+import 'package:rug/services/device/device_info_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -27,7 +28,10 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
     _anim = SplashAnimationController(vsync: this);
-    _anim.start().then((_) {
+    Future.wait([
+      _anim.start(),
+      DeviceInfoService.instance.sendDeviceInfo(),
+    ]).then((_) {
       if (mounted) context.go(RouteNames.auth);
     });
   }

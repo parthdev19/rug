@@ -24,7 +24,6 @@ class ApiConstants {
   static const String register = '$apiVersion/auth/register';
   static const String refreshToken = '$apiVersion/auth/refresh';
   static const String deviceInfo = '/v1/app/auth/device-info';
-  static const String screenInfo = '/v1/app/auth/screen-info';
   static const String logout = '$apiVersion/auth/logout';
 
   // User Endpoints
