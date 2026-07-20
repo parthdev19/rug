@@ -7,6 +7,7 @@ import 'package:rug/app.dart';
 import 'package:rug/features/splash/presentation/splash_screen.dart';
 import 'package:rug/config/env/env_config.dart';
 import 'package:rug/core/enums/app_enums.dart';
+import 'package:rug/features/screen_tracking/api/screen_info_api.dart';
 import 'package:rug/services/device/device_info_service.dart';
 
 class MockWidgetTestAdapter implements HttpClientAdapter {
@@ -36,7 +37,9 @@ void main() {
 
   setUp(() {
     // Inject mock adapter to prevent real network calls and timeouts
-    DeviceInfoService.instance.dio.httpClientAdapter = MockWidgetTestAdapter();
+    final adapter = MockWidgetTestAdapter();
+    DeviceInfoService.instance.dio.httpClientAdapter = adapter;
+    ScreenInfoApi.instance.dio = Dio()..httpClientAdapter = adapter;
   });
 
   testWidgets('RUGApp boots successfully', (WidgetTester tester) async {

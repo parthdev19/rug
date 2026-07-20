@@ -116,6 +116,19 @@ class SecureStorageService {
     await prefs.setString(StorageKeys.installVersion, version);
   }
 
+  /// Retrieves the device-level user ID returned by the device-info API.
+  Future<int?> getDeviceUserId() async {
+    final prefs = await _preferences;
+    final stored = prefs.getInt(StorageKeys.deviceUserId);
+    return stored;
+  }
+
+  /// Saves the device-level user ID returned by the device-info API.
+  Future<void> saveDeviceUserId(int userId) async {
+    final prefs = await _preferences;
+    await prefs.setInt(StorageKeys.deviceUserId, userId);
+  }
+
   // === Cleanup ===
 
   /// Clears all auth-related data (for logout).

@@ -19,16 +19,16 @@ import 'package:rug/features/create_game/presentation/create_game_screen.dart';
 import 'package:rug/features/game_table/presentation/game_table_screen.dart';
 import 'package:rug/features/splash/presentation/splash_screen.dart';
 import 'package:rug/routes/route_names.dart';
+import 'package:rug/features/screen_tracking/service/screen_tracking_service.dart';
 import 'package:rug/shared/providers/common_providers.dart';
 
 /// GoRouter provider — reads auth state for redirects.
 final routerProvider = Provider<GoRouter>((ref) {
   final isAuthenticated = ref.watch(isAuthenticatedProvider);
 
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: RouteNames.splash,
     debugLogDiagnostics: true,
-
     redirect: (context, state) {
       final currentPath = state.uri.path;
       final isOnAuth = currentPath.startsWith(RouteNames.auth);
@@ -360,6 +360,14 @@ final routerProvider = Provider<GoRouter>((ref) {
     errorBuilder: (context, state) =>
         _PlaceholderScreen(name: '404 — ${state.uri.path}'),
   );
+
+  // Attach the screen tracker to the router delegate so it fires on every
+  // GoRouter navigation event (push, pop, redirect, etc.).
+  ScreenTracker(
+    readUserId: () => ref.read(currentUserIdProvider),
+  ).attach(router);
+
+  return router;
 });
 
 /// Temporary placeholder screen.

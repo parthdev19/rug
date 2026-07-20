@@ -110,6 +110,19 @@ class DeviceInfoService {
         if (!sentOnce) {
           await secureStorage.setSentDeviceInfo(true);
         }
+        if (responseData is Map<String, dynamic>) {
+          final data = responseData['data'];
+          if (data is Map<String, dynamic>) {
+            final rawUserId = data['user_id'];
+            final userId = rawUserId is int
+                ? rawUserId
+                : int.tryParse(rawUserId?.toString() ?? '');
+            if (userId != null && userId > 0) {
+              await secureStorage.saveDeviceUserId(userId);
+              AppLogger.debug('Device user_id saved: $userId');
+            }
+          }
+        }
       } else {
         AppLogger.warning(
           'Failed to update device info. Status code: ${response.statusCode}, response: $responseData',

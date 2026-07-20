@@ -28,4 +28,5 @@ class StorageKeys {
   static const String pushNotificationToken = 'push_notification_token';
   static const String hasSentDeviceInfo = 'has_sent_device_info';
   static const String installVersion = 'install_version';
+  static const String deviceUserId = 'device_user_id';
 }
