@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "831908426755",
+    "project_id": "rugcards-a8808",
+    "storage_bucket": "rugcards-a8808.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831908426755:android:e4e89a6dc52c2db183ca36",
+        "android_client_info": {
+          "package_name": "com.parth.rug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "831908426755-5vihm1rqj544oaenr98j1hi67jsrr6db.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAshq2ksRJkx7mSVeH_C0nRbug4f_vRflY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "831908426755-5vihm1rqj544oaenr98j1hi67jsrr6db.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
