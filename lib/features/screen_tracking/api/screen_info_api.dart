@@ -32,6 +32,7 @@ class ScreenInfoApi {
     try {
       final payload = {
         'user_id': userId,
+        'userId': userId,
         'screen_info': [entry.toJson()],
       };
 
