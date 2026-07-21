@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.parth.rugg"
+    namespace = "com.parth.rug"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

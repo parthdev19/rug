@@ -173,6 +173,12 @@ class DeviceInfoService {
     }
   }
 
+  /// Exposes the device ID publicly.
+  Future<String> getDeviceId() async {
+    final details = await _getDeviceDetails();
+    return details['device_id'] ?? 'unknown_id';
+  }
+
   /// Get device ID and device name depending on platform.
   Future<Map<String, String>> _getDeviceDetails() async {
     String deviceId = 'unknown_id';

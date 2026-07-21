@@ -8,11 +8,13 @@ import 'package:dio/dio.dart';
 import 'package:rug/core/constants/api_constants.dart';
 import 'package:rug/services/logging/app_logger.dart';
 
+import 'package:rug/services/storage/secure_storage_service.dart';
+
 class ApiInterceptor extends Interceptor {
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     // Inject auth token
-    final token = _getAccessToken();
+    final token = await _getAccessToken();
     if (token != null) {
       options.headers[ApiConstants.authHeader] =
           '${ApiConstants.bearerPrefix}$token';
@@ -64,9 +66,8 @@ class ApiInterceptor extends Interceptor {
   }
 
   /// Retrieves the current access token from storage.
-  String? _getAccessToken() {
-    // TODO: Implement token retrieval from secure storage
-    return null;
+  Future<String?> _getAccessToken() async {
+    return SecureStorageService.instance.getAccessToken();
   }
 
   /// Attempts to refresh the auth token.
@@ -81,7 +82,7 @@ class ApiInterceptor extends Interceptor {
 
   /// Retries a request with updated auth headers.
   Future<Response> _retry(RequestOptions requestOptions) async {
-    final token = _getAccessToken();
+    final token = await _getAccessToken();
     final options = Options(
       method: requestOptions.method,
       headers: {

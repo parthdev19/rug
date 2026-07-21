@@ -1,7 +1,9 @@
-/// Repository interface for the auth feature.
-library;
+import 'package:rug/shared/models/user_model.dart';
 
-// TODO: Define repository contract for auth
 abstract class AuthRepository {
-  // TODO: Add abstract methods
+  Future<UserModel?> socialSignIn({
+    required String email,
+    required String googleAuthToken,
+    String? username,
+  });
 }

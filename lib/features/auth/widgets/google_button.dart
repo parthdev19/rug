@@ -8,9 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class GoogleButton extends StatefulWidget {
-  const GoogleButton({required this.onPressed, super.key});
+  const GoogleButton({required this.onPressed, this.isLoading = false, super.key});
 
   final VoidCallback onPressed;
+  final bool isLoading;
 
   @override
   State<GoogleButton> createState() => _GoogleButtonState();
@@ -54,10 +55,16 @@ class _GoogleButtonState extends State<GoogleButton>
     return ScaleTransition(
       scale: _scaleAnimation,
       child: GestureDetector(
-        onTapDown: (_) => _controller.forward(),
+        onTapDown: (_) {
+          if (!widget.isLoading) {
+            _controller.forward();
+          }
+        },
         onTapUp: (_) {
           _controller.reverse();
-          widget.onPressed();
+          if (!widget.isLoading) {
+            widget.onPressed();
+          }
         },
         onTapCancel: () => _controller.reverse(),
         child: Container(
@@ -88,36 +95,47 @@ class _GoogleButtonState extends State<GoogleButton>
               ),
             ],
           ),
-          child: Stack(
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: SvgPicture.string(
-                    googleSvg,
-                    width: 22,
-                    height: 22,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.white,
-                      BlendMode.srcIn,
+          child: widget.isLoading
+              ? const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 2,
                     ),
                   ),
+                )
+              : Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20),
+                        child: SvgPicture.string(
+                          googleSvg,
+                          width: 22,
+                          height: 22,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Center(
+                      child: Text(
+                        'Continue with Google',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const Center(
-                child: Text(
-                  'Continue with Google',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

@@ -1,4 +1,4 @@
-package com.example.rug
+package com.parth.rug
 
 import io.flutter.embedding.android.FlutterActivity
 

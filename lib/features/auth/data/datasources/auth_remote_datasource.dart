@@ -1,7 +1,17 @@
-/// Remote data source for the auth feature.
-library;
+import 'package:rug/features/auth/data/datasources/auth_api.dart';
 
-// TODO: Implement API calls for auth
 class AuthRemoteDataSource {
-  // TODO: Add remote data source methods
+  Future<Map<String, dynamic>> socialSignIn({
+    required String email,
+    required String deviceId,
+    required String googleAuthToken,
+    String? username,
+  }) async {
+    return AuthApi.instance.socialSignIn(
+      email: email,
+      deviceId: deviceId,
+      googleAuthToken: googleAuthToken,
+      username: username,
+    );
+  }
 }

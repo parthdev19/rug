@@ -5,16 +5,37 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rug/features/auth/controller/auth_controller.dart';
 import 'package:rug/features/auth/widgets/auth_widgets.dart';
 import 'package:rug/features/splash/widgets/splash_animation_constants.dart';
 import 'package:rug/routes/route_names.dart';
 
-class AuthScreen extends StatelessWidget {
+class AuthScreen extends ConsumerWidget {
   const AuthScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authControllerProvider);
+
+    // Listen for error messages
+    ref.listen<AsyncValue<void>>(authControllerProvider, (previous, next) {
+      if (next is AsyncError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFFDA3633),
+            content: Text(
+              next.error.toString().replaceAll('Exception: ', ''),
+              style: const TextStyle(color: Colors.white),
+            ),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Container(
@@ -71,8 +92,11 @@ class AuthScreen extends StatelessWidget {
 
                           // ── GOOGLE BUTTON ────────────────────────────────────────
                           GoogleButton(
+                            isLoading: authState.isLoading,
                             onPressed: () {
-                              // Action triggered on Continue with Google
+                              ref
+                                  .read(authControllerProvider.notifier)
+                                  .signInWithGoogle();
                             },
                           ),
 
