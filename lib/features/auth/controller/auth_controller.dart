@@ -45,6 +45,13 @@ class AuthController extends _$AuthController {
 
       final auth = await account.authentication;
       final idToken = auth.idToken;
+      final accessToken = auth.accessToken;
+
+      AppLogger.debug(
+        'Google tokens — idToken: ${idToken != null ? '${idToken.length} chars' : 'NULL'} | '
+        'accessToken: ${accessToken != null ? '${accessToken.length} chars' : 'NULL'}',
+      );
+
       if (idToken == null) {
         throw Exception(
           'Google login succeeded, but no ID token was retrieved.',

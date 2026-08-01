@@ -35,6 +35,7 @@ class AuthApi {
         MapEntry('device_id', deviceId),
         MapEntry('google_auth_token', googleAuthToken),
         const MapEntry('is_social_login', 'true'),
+        const MapEntry('social_media_type', 'google'),
         MapEntry('lang', language),
         MapEntry('email', email),
         MapEntry('long', longitude.toString()),

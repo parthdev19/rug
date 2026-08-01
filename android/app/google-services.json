@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "831908426755-uiq3helm1ghqim0brfv8bq1v3tbgsjlk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.parth.rug",
+            "certificate_hash": "0aea0a28bda7e05b0b20d18ef511c35904cc99fc"
+          }
+        },
+        {
           "client_id": "831908426755-5vihm1rqj544oaenr98j1hi67jsrr6db.apps.googleusercontent.com",
           "client_type": 3
         }
