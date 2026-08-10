@@ -139,28 +139,23 @@ void main() {
           email: 'test@gmail.com',
           deviceId: 'device_123',
           googleAuthToken: 'google_token',
-          username: 'test_user',
         );
 
         expect(result['id'], 42);
         expect(result['token'], 'mock_jwt_token');
         expect(result['username'], 'test_user');
         expect(result['profile'], 'https://profile.url');
+
         final request = mockAdapter.lastRequestOptions!;
-        expect(request.path, ApiConstants.appSignUp);
-        expect(request.data, isA<FormData>());
-        expect(
-          Map<String, String>.fromEntries((request.data as FormData).fields),
-          {
-            'device_id': 'device_123',
-            'google_auth_token': 'google_token',
-            'is_social_login': 'true',
-            'lang': 'en',
-            'email': 'test@gmail.com',
-            'long': '0.0',
-            'username': 'test_user',
-          },
-        );
+        // Must hit /sign_in, not /sign_up
+        expect(request.path, ApiConstants.appSignIn);
+        // Must be JSON, not multipart/form-data
+        final body = request.data as Map<String, dynamic>;
+        expect(body['email'], 'test@gmail.com');
+        expect(body['device_id'], 'device_123');
+        expect(body['google_auth_token'], 'google_token');
+        expect(body['is_social_login'], true);
+        expect(body['social_media_type'], 'google');
       },
     );
 

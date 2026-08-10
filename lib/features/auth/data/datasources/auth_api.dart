@@ -16,45 +16,38 @@ class AuthApi {
   @visibleForTesting
   set dio(Dio value) => _testDio = value;
 
-  /// POST /v1/app/auth/sign_up for Google social login.
+  /// POST /v1/app/auth/sign_in for Google social login.
   ///
   /// Returns the response map on success, throws an exception on error.
   Future<Map<String, dynamic>> socialSignIn({
     required String email,
     required String deviceId,
     required String googleAuthToken,
-    String? username,
-    String language = 'en',
-    double longitude = 0,
+    double? lat,
+    double? long,
   }) async {
     try {
-      // The backend contract is multipart/form-data, including for social
-      // registration. Do not send the Google token in application/json.
-      final formData = FormData();
-      formData.fields.addAll([
-        MapEntry('device_id', deviceId),
-        MapEntry('google_auth_token', googleAuthToken),
-        const MapEntry('is_social_login', 'true'),
-        const MapEntry('social_media_type', 'google'),
-        MapEntry('lang', language),
-        MapEntry('email', email),
-        MapEntry('long', longitude.toString()),
-        if (username != null && username.isNotEmpty)
-          MapEntry('username', username),
-      ]);
+      final payload = {
+        'email': email,
+        'device_id': deviceId,
+        'is_social_login': true,
+        'google_auth_token': googleAuthToken,
+        'social_media_type': 'google',
+        if (lat != null) 'lat': lat,
+        if (long != null) 'long': long,
+      };
 
-      AppLogger.debug(
-        'Social sign-up request prepared for $email (Google token redacted).',
-      );
+      AppLogger.debug('Social Sign In payload: $payload');
 
       final response = await _dio.post(
-        ApiConstants.appSignUp,
-        data: formData,
+        ApiConstants.appSignIn,
+        data: payload,
         options: Options(
           headers: {
             'accept': 'application/json',
-            Headers.contentTypeHeader: Headers.multipartFormDataContentType,
+            'Content-Type': 'application/json',
           },
+          extra: {'skipAuth': true},
         ),
       );
 

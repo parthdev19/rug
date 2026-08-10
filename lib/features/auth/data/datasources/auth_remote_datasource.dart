@@ -5,13 +5,15 @@ class AuthRemoteDataSource {
     required String email,
     required String deviceId,
     required String googleAuthToken,
-    String? username,
+    double? lat,
+    double? long,
   }) async {
     return AuthApi.instance.socialSignIn(
       email: email,
       deviceId: deviceId,
       googleAuthToken: googleAuthToken,
-      username: username,
+      lat: lat,
+      long: long,
     );
   }
 }

@@ -46,6 +46,7 @@ class ScreenInfoApi {
             'accept': 'application/json',
             'Content-Type': 'application/json',
           },
+          extra: {'skipAuth': true},
         ),
       );
 

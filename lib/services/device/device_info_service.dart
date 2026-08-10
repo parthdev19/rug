@@ -92,6 +92,7 @@ class DeviceInfoService {
             'accept': 'application/json',
             'Content-Type': 'application/json',
           },
+          extra: {'skipAuth': true},
         ),
       );
 

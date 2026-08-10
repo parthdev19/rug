@@ -14,7 +14,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserModel?> socialSignIn({
     required String email,
     required String googleAuthToken,
-    String? username,
   }) async {
     final deviceId = await DeviceInfoService.instance.getDeviceId();
 
@@ -22,7 +21,6 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       deviceId: deviceId,
       googleAuthToken: googleAuthToken,
-      username: username,
     );
 
     final userData = data['user'] is Map<String, dynamic>
@@ -41,10 +39,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return UserModel(
         id: id.toString(),
-        username: responseUsername ?? username ?? '',
+        username: responseUsername ?? '',
         email: email,
         avatarUrl: profile,
-        displayName: responseUsername ?? username,
+        displayName: responseUsername,
       );
     }
 

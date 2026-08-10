@@ -62,7 +62,6 @@ class AuthController extends _$AuthController {
       final user = await repository.socialSignIn(
         email: account.email,
         googleAuthToken: idToken,
-        username: _fallbackUsername(account.email),
       );
 
       if (user != null) {
@@ -92,8 +91,4 @@ class AuthController extends _$AuthController {
     }
   }
 
-  String _fallbackUsername(String email) {
-    final localPart = email.split('@').first;
-    return localPart.isEmpty ? 'player' : localPart;
-  }
 }
