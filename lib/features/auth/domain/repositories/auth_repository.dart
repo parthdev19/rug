@@ -5,4 +5,16 @@ abstract class AuthRepository {
     required String email,
     required String googleAuthToken,
   });
+
+  Future<UserModel?> emailSignIn({
+    required String email,
+    required String password,
+  });
+
+  Future<UserModel?> signUp({
+    required String username,
+    required String email,
+    required String password,
+    String? profileImagePath,
+  });
 }

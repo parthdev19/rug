@@ -5,19 +5,21 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rug/features/auth/controller/auth_controller.dart';
 import 'package:rug/features/auth/widgets/auth_widgets.dart';
 import 'package:rug/features/splash/widgets/splash_animation_constants.dart';
 import 'package:rug/routes/route_names.dart';
 
-class EmailSignInScreen extends StatefulWidget {
+class EmailSignInScreen extends ConsumerStatefulWidget {
   const EmailSignInScreen({super.key});
 
   @override
-  State<EmailSignInScreen> createState() => _EmailSignInScreenState();
+  ConsumerState<EmailSignInScreen> createState() => _EmailSignInScreenState();
 }
 
-class _EmailSignInScreenState extends State<EmailSignInScreen> {
+class _EmailSignInScreenState extends ConsumerState<EmailSignInScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -34,24 +36,41 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
     super.dispose();
   }
 
-  void _handleSignIn() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _handleSignIn() async {
+    if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         _isLoading = true;
       });
-      // Simulate authenticating
-      Future.delayed(const Duration(milliseconds: 1500), () {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-          // Show verification success placeholder
+
+      final success = await ref
+          .read(authControllerProvider.notifier)
+          .signInWithEmail(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (success) {
+          context.go(RouteNames.home);
+        } else {
+          final authState = ref.read(authControllerProvider);
+          final errorMsg = authState.error != null
+              ? authState.error.toString().replaceFirst('Exception: ', '')
+              : 'Sign in failed. Please check your credentials.';
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              backgroundColor: const Color(0xFF0F8A64),
-              content: const Text(
-                'Authenticated successfully! (Demo)',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              backgroundColor: const Color(0xFFDA3633),
+              content: Text(
+                errorMsg,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
@@ -60,7 +79,7 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
             ),
           );
         }
-      });
+      }
     }
   }
 

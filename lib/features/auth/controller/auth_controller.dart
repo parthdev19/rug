@@ -91,4 +91,31 @@ class AuthController extends _$AuthController {
     }
   }
 
+  Future<bool> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      final repository = ref.read(authRepositoryProvider);
+      final user = await repository.emailSignIn(
+        email: email,
+        password: password,
+      );
+
+      if (user != null) {
+        ref.read(currentUserProvider.notifier).setUser(user);
+        ref.read(currentUserIdProvider.notifier).setUserId(user.id);
+        ref.read(isAuthenticatedProvider.notifier).setAuthenticated(true);
+        state = const AsyncData(null);
+        return true;
+      }
+
+      throw Exception('Authentication response was invalid.');
+    } catch (e, st) {
+      AppLogger.error('Email Sign In failed', error: e, stackTrace: st);
+      state = AsyncError(e, st);
+      return false;
+    }
+  }
 }

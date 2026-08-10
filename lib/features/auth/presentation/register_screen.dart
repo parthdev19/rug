@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rug/features/auth/controller/register_controller.dart';
 import 'package:rug/features/auth/widgets/auth_widgets.dart';
 import 'package:rug/features/splash/widgets/splash_animation_constants.dart';
+import 'package:rug/routes/route_names.dart';
 import 'package:rug/shared/providers/common_providers.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -48,19 +49,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
       final controller = ref.read(registerControllerProvider.notifier);
-      
+
       // Update form values in state
-      controller.updateUsername(_usernameController.text);
-      controller.updateEmail(_emailController.text);
+      controller.updateUsername(_usernameController.text.trim());
+      controller.updateEmail(_emailController.text.trim());
       controller.updatePassword(_passwordController.text);
       controller.updateConfirmPassword(_confirmPasswordController.text);
 
       final success = await controller.register();
       if (success && mounted) {
-        // Update global authentication provider
-        ref.read(isAuthenticatedProvider.notifier).setAuthenticated(true);
-        // Clean state
+        // Clean state and navigate to home
         controller.reset();
+        context.go(RouteNames.home);
       }
     }
   }
