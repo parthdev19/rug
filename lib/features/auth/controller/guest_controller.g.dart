@@ -41,7 +41,7 @@ final class GuestControllerProvider
   }
 }
 
-String _$guestControllerHash() => r'dcbf02b071427d74bd3084e49d41bd26d7b1863c';
+String _$guestControllerHash() => r'6ca0877d9743d18b19122fca691576f488e9f864';
 
 abstract class _$GuestController extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

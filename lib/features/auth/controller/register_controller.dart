@@ -43,28 +43,25 @@ class RegisterController extends _$RegisterController {
     state = const RegisterState();
   }
 
-  /// Trigger registration API request.
+  /// Submit registration to the backend.
+  ///
+  /// Returns `true` on success (app should navigate to OTP verification).
+  /// Returns `false` on error (errorMessage is set in state).
   Future<bool> register() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
       final repository = ref.read(authRepositoryProvider);
-      final user = await repository.signUp(
+      // signUp returns raw data — does NOT create session (user must verify OTP first)
+      await repository.signUp(
         username: state.username,
         email: state.email,
         password: state.password,
         profileImagePath: state.profileImagePath,
       );
 
-      if (user != null) {
-        ref.read(currentUserProvider.notifier).setUser(user);
-        ref.read(currentUserIdProvider.notifier).setUserId(user.id);
-        ref.read(isAuthenticatedProvider.notifier).setAuthenticated(true);
-        state = state.copyWith(isLoading: false, isSuccess: true);
-        return true;
-      }
-
-      throw Exception('Registration response was invalid.');
+      state = state.copyWith(isLoading: false, isSuccess: true);
+      return true;
     } catch (e) {
       final errorMsg = e.toString().replaceFirst('Exception: ', '');
       state = state.copyWith(isLoading: false, errorMessage: errorMsg);

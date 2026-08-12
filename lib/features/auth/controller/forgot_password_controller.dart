@@ -3,6 +3,7 @@ library;
 
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:rug/features/auth/controller/auth_controller.dart';
 import 'package:rug/features/auth/controller/forgot_password_state.dart';
 
 part 'forgot_password_controller.g.dart';
@@ -47,16 +48,17 @@ class ForgotPasswordController extends _$ForgotPasswordController {
     _timer?.cancel();
   }
 
-  /// Simulate sending an OTP code.
+  /// Send forgot-password OTP to the user's email (real API call).
   Future<bool> sendOtp() async {
+    final email = state.emailOrUsername.trim();
     state = state.copyWith(
       isEmailSubmitLoading: true,
       emailSubmitSuccess: false,
+      emailSubmitError: null,
     );
-
     try {
-      // Simulate network request
-      await Future.delayed(const Duration(milliseconds: 1500));
+      final repository = ref.read(authRepositoryProvider);
+      await repository.forgotPassword(email: email);
       state = state.copyWith(
         isEmailSubmitLoading: false,
         emailSubmitSuccess: true,
@@ -64,121 +66,116 @@ class ForgotPasswordController extends _$ForgotPasswordController {
       startTimer();
       return true;
     } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
       state = state.copyWith(
         isEmailSubmitLoading: false,
-        emailSubmitError: e.toString(),
+        emailSubmitError: msg,
       );
       return false;
     }
   }
 
-  /// Simulate resending the OTP code.
+  /// Resend forgot-password OTP (real API call).
   Future<bool> resendOtp() async {
-    if (state.countdownSeconds > 0) {
-      // Cannot resend until timer expires
-      return false;
-    }
+    if (state.countdownSeconds > 0) return false;
 
-    state = state.copyWith(
-      isOtpVerifyLoading: true,
-    );
-
+    final email = state.emailOrUsername.trim();
+    state = state.copyWith(isOtpVerifyLoading: true, otpVerifyError: null);
     try {
-      // Simulate network request
-      await Future.delayed(const Duration(milliseconds: 1000));
+      final repository = ref.read(authRepositoryProvider);
+      await repository.forgotPassword(email: email);
       state = state.copyWith(
         isOtpVerifyLoading: false,
-        otp: '', // Clear previous code input
+        otp: '',
       );
       startTimer();
       return true;
     } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
       state = state.copyWith(
         isOtpVerifyLoading: false,
-        otpVerifyError: 'Failed to resend code. Please try again.',
+        otpVerifyError: msg,
       );
       return false;
     }
   }
 
-  /// Verify the entered 6-digit OTP code.
+  /// Verify forgot-password OTP — stores reset_token on success (real API).
   Future<bool> verifyOtpCode(String code) async {
+    final email = state.emailOrUsername.trim();
+    final otpInt = int.tryParse(code);
+
+    if (otpInt == null) {
+      state = state.copyWith(otpVerifyError: 'Please enter a valid OTP code.');
+      return false;
+    }
+
     state = state.copyWith(
       isOtpVerifyLoading: true,
       otpVerifySuccess: false,
+      otpVerifyError: null,
     );
 
     try {
-      await Future.delayed(const Duration(milliseconds: 1500));
-      
-      // Validation: Mock code is "123456". Check if timer expired.
-      if (state.countdownSeconds == 0) {
-        state = state.copyWith(
-          isOtpVerifyLoading: false,
-          otpVerifyError: 'Verification code has expired. Please request a new one.',
-        );
-        return false;
-      }
-
-      if (code == '123456') {
-        _timer?.cancel();
-        state = state.copyWith(
-          isOtpVerifyLoading: false,
-          otpVerifySuccess: true,
-        );
-        return true;
-      } else {
-        state = state.copyWith(
-          isOtpVerifyLoading: false,
-          otpVerifyError: 'Invalid verification code. Please check and try again.',
-        );
-        return false;
-      }
-    } catch (e) {
+      final repository = ref.read(authRepositoryProvider);
+      final resetToken = await repository.verifyForgotPasswordOtp(
+        email: email,
+        otp: otpInt,
+      );
+      _timer?.cancel();
       state = state.copyWith(
         isOtpVerifyLoading: false,
-        otpVerifyError: e.toString(),
+        otpVerifySuccess: true,
+        resetToken: resetToken,
+      );
+      return true;
+    } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      state = state.copyWith(
+        isOtpVerifyLoading: false,
+        otpVerifyError: msg,
       );
       return false;
     }
   }
 
-  /// Simulate updating password.
+  /// Reset password using the stored reset_token (real API call).
   Future<bool> resetPassword(String newPassword, String confirmPassword) async {
+    if (newPassword != confirmPassword) {
+      state = state.copyWith(resetPasswordError: 'Passwords do not match.');
+      return false;
+    }
+
+    final resetToken = state.resetToken;
+    if (resetToken == null || resetToken.isEmpty) {
+      state = state.copyWith(
+        resetPasswordError: 'Session expired. Please restart the password reset.',
+      );
+      return false;
+    }
+
     state = state.copyWith(
       isResetPasswordLoading: true,
       resetPasswordSuccess: false,
+      resetPasswordError: null,
     );
 
     try {
-      await Future.delayed(const Duration(milliseconds: 2000));
-      
-      // Simple validation checks (though should be captured by form state validation)
-      if (newPassword.length < 8) {
-        state = state.copyWith(
-          isResetPasswordLoading: false,
-          resetPasswordError: 'Password must be at least 8 characters.',
-        );
-        return false;
-      }
-
-      if (newPassword != confirmPassword) {
-        state = state.copyWith(
-          isResetPasswordLoading: false,
-          resetPasswordError: 'Passwords do not match.',
-        );
-        return false;
-      }
-
+      final repository = ref.read(authRepositoryProvider);
+      await repository.resetPassword(
+        resetToken: resetToken,
+        newPassword: newPassword,
+      );
       state = state.copyWith(
         isResetPasswordLoading: false,
         resetPasswordSuccess: true,
       );
       return true;
     } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
       state = state.copyWith(
         isResetPasswordLoading: false,
-        resetPasswordError: e.toString(),
+        resetPasswordError: msg,
       );
       return false;
     }

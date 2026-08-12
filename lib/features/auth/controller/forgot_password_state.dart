@@ -15,6 +15,7 @@ class ForgotPasswordState {
     this.emailSubmitSuccess = false,
     this.otpVerifySuccess = false,
     this.resetPasswordSuccess = false,
+    this.resetToken,
   });
 
   final String emailOrUsername;
@@ -30,6 +31,9 @@ class ForgotPasswordState {
   final bool otpVerifySuccess;
   final bool resetPasswordSuccess;
 
+  /// Token returned by verify_forgot_password_otp — used to call reset_password.
+  final String? resetToken;
+
   ForgotPasswordState copyWith({
     String? emailOrUsername,
     String? otp,
@@ -43,6 +47,7 @@ class ForgotPasswordState {
     bool? emailSubmitSuccess,
     bool? otpVerifySuccess,
     bool? resetPasswordSuccess,
+    String? resetToken,
   }) {
     return ForgotPasswordState(
       emailOrUsername: emailOrUsername ?? this.emailOrUsername,
@@ -51,12 +56,13 @@ class ForgotPasswordState {
       isEmailSubmitLoading: isEmailSubmitLoading ?? this.isEmailSubmitLoading,
       isOtpVerifyLoading: isOtpVerifyLoading ?? this.isOtpVerifyLoading,
       isResetPasswordLoading: isResetPasswordLoading ?? this.isResetPasswordLoading,
-      emailSubmitError: emailSubmitError, // We pass custom value, which could be null
+      emailSubmitError: emailSubmitError,
       otpVerifyError: otpVerifyError,
       resetPasswordError: resetPasswordError,
       emailSubmitSuccess: emailSubmitSuccess ?? this.emailSubmitSuccess,
       otpVerifySuccess: otpVerifySuccess ?? this.otpVerifySuccess,
       resetPasswordSuccess: resetPasswordSuccess ?? this.resetPasswordSuccess,
+      resetToken: resetToken ?? this.resetToken,
     );
   }
 }
