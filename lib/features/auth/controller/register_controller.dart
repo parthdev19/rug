@@ -2,7 +2,9 @@
 library;
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:rug/features/auth/controller/auth_controller.dart';
 import 'package:rug/features/auth/controller/register_state.dart';
+import 'package:rug/shared/providers/common_providers.dart';
 
 part 'register_controller.g.dart';
 
@@ -41,24 +43,31 @@ class RegisterController extends _$RegisterController {
     state = const RegisterState();
   }
 
-  /// Trigger simulated registration API request.
+  /// Trigger registration API request.
   Future<bool> register() async {
-    state = RegisterState(
-      username: state.username,
-      email: state.email,
-      password: state.password,
-      confirmPassword: state.confirmPassword,
-      profileImagePath: state.profileImagePath,
-      isLoading: true,
-    );
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      // Simulate API call delay
-      await Future.delayed(const Duration(milliseconds: 2000));
-      state = state.copyWith(isLoading: false, isSuccess: true);
-      return true;
+      final repository = ref.read(authRepositoryProvider);
+      final user = await repository.signUp(
+        username: state.username,
+        email: state.email,
+        password: state.password,
+        profileImagePath: state.profileImagePath,
+      );
+
+      if (user != null) {
+        ref.read(currentUserProvider.notifier).setUser(user);
+        ref.read(currentUserIdProvider.notifier).setUserId(user.id);
+        ref.read(isAuthenticatedProvider.notifier).setAuthenticated(true);
+        state = state.copyWith(isLoading: false, isSuccess: true);
+        return true;
+      }
+
+      throw Exception('Registration response was invalid.');
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      final errorMsg = e.toString().replaceFirst('Exception: ', '');
+      state = state.copyWith(isLoading: false, errorMessage: errorMsg);
       return false;
     }
   }

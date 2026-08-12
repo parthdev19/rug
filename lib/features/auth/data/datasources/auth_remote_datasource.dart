@@ -16,4 +16,40 @@ class AuthRemoteDataSource {
       long: long,
     );
   }
+
+  Future<Map<String, dynamic>> emailSignIn({
+    required String email,
+    required String password,
+    required String deviceId,
+    double? lat,
+    double? long,
+  }) async {
+    return AuthApi.instance.emailSignIn(
+      email: email,
+      password: password,
+      deviceId: deviceId,
+      lat: lat,
+      long: long,
+    );
+  }
+
+  Future<Map<String, dynamic>> signUp({
+    required String username,
+    required String email,
+    required String password,
+    required String deviceId,
+    String? profileImagePath,
+    double? lat,
+    double? long,
+  }) async {
+    return AuthApi.instance.signUp(
+      username: username,
+      email: email,
+      password: password,
+      deviceId: deviceId,
+      profileImagePath: profileImagePath,
+      lat: lat,
+      long: long,
+    );
+  }
 }
