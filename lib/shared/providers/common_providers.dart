@@ -45,6 +45,9 @@ class CurrentUserId extends _$CurrentUserId {
 
   /// Update the current user ID.
   void setUserId(String? value) => state = value;
+
+  /// Clear the current user ID on logout.
+  void clearUserId() => state = null;
 }
 
 /// Current logged in user model (null when not logged in).
@@ -55,6 +58,9 @@ class CurrentUser extends _$CurrentUser {
 
   /// Update the current user.
   void setUser(UserModel? user) => state = user;
+
+  /// Clear the current user on logout.
+  void clearUser() => state = null;
 }
 
 /// Helper provider to check if the current user is a guest.

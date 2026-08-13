@@ -297,7 +297,7 @@ final class CurrentUserIdProvider
   }
 }
 
-String _$currentUserIdHash() => r'e3df4467335c4cf98201e89fad70855c46e1b972';
+String _$currentUserIdHash() => r'026b56440ac184fce9cc8f48ce204b699badfc08';
 
 /// Current user ID (null when not logged in).
 
@@ -355,7 +355,7 @@ final class CurrentUserProvider
   }
 }
 
-String _$currentUserHash() => r'a5823c796e2ee4e483a4bb780a73b9d37421318d';
+String _$currentUserHash() => r'2a2e476d2d49c0542b0d7d7b1dc6b6a3c1dc3dd0';
 
 /// Current logged in user model (null when not logged in).
 

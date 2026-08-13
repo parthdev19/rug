@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rug/features/auth/controller/register_controller.dart';
+import 'package:rug/features/auth/presentation/sign_up_otp_verification_screen.dart';
 import 'package:rug/features/auth/widgets/auth_widgets.dart';
 import 'package:rug/features/splash/widgets/splash_animation_constants.dart';
 import 'package:rug/routes/route_names.dart';
@@ -56,11 +57,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       controller.updatePassword(_passwordController.text);
       controller.updateConfirmPassword(_confirmPasswordController.text);
 
+      final email = _emailController.text.trim();
       final success = await controller.register();
+
       if (success && mounted) {
-        // Clean state and navigate to home
+        // Account created — navigate to OTP verification before login
         controller.reset();
-        context.go(RouteNames.home);
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => SignUpOtpVerificationScreen(email: email),
+          ),
+        );
       }
     }
   }
