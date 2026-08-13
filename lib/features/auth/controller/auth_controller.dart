@@ -118,4 +118,45 @@ class AuthController extends _$AuthController {
       return false;
     }
   }
+
+  /// Logout the current user — calls backend then clears local session.
+  Future<void> logout() async {
+    state = const AsyncLoading();
+    try {
+      final repository = ref.read(authRepositoryProvider);
+      await repository.logout();
+
+      // Also sign out from Google if applicable
+      await ref.read(googleSignInProvider).signOut().catchError((_) => null);
+
+      // Clear all local auth state
+      ref.read(currentUserProvider.notifier).clearUser();
+      ref.read(currentUserIdProvider.notifier).clearUserId();
+      ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
+
+      state = const AsyncData(null);
+    } catch (e, st) {
+      AppLogger.error('Logout failed', error: e, stackTrace: st);
+      // Even if API fails, clear local state
+      ref.read(currentUserProvider.notifier).clearUser();
+      ref.read(currentUserIdProvider.notifier).clearUserId();
+      ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
+      state = const AsyncData(null);
+    }
+  }
+
+  /// Fetch the authenticated user profile from the backend.
+  Future<Map<String, dynamic>?> getProfile() async {
+    state = const AsyncLoading();
+    try {
+      final repository = ref.read(authRepositoryProvider);
+      final profileData = await repository.getProfile();
+      state = const AsyncData(null);
+      return profileData;
+    } catch (e, st) {
+      AppLogger.error('Get Profile failed', error: e, stackTrace: st);
+      state = AsyncError(e, st);
+      return null;
+    }
+  }
 }

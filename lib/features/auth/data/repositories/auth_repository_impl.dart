@@ -6,67 +6,15 @@ import 'package:rug/shared/models/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({AuthRemoteDataSource? remoteDataSource})
-    : _remoteDataSource = remoteDataSource ?? AuthRemoteDataSource();
+      : _remoteDataSource = remoteDataSource ?? AuthRemoteDataSource();
 
   final AuthRemoteDataSource _remoteDataSource;
 
-  @override
-  Future<UserModel?> socialSignIn({
-    required String email,
-    required String googleAuthToken,
-  }) async {
-    final deviceId = await DeviceInfoService.instance.getDeviceId();
+  // ── Internal helpers ───────────────────────────────────────────────────────
 
-    final data = await _remoteDataSource.socialSignIn(
-      email: email,
-      deviceId: deviceId,
-      googleAuthToken: googleAuthToken,
-    );
+  Future<String> get _deviceId => DeviceInfoService.instance.getDeviceId();
 
-    return _saveSessionAndCreateUser(data: data, fallbackEmail: email);
-  }
-
-  @override
-  Future<UserModel?> emailSignIn({
-    required String email,
-    required String password,
-  }) async {
-    final deviceId = await DeviceInfoService.instance.getDeviceId();
-
-    final data = await _remoteDataSource.emailSignIn(
-      email: email,
-      password: password,
-      deviceId: deviceId,
-    );
-
-    return _saveSessionAndCreateUser(data: data, fallbackEmail: email);
-  }
-
-  @override
-  Future<UserModel?> signUp({
-    required String username,
-    required String email,
-    required String password,
-    String? profileImagePath,
-  }) async {
-    final deviceId = await DeviceInfoService.instance.getDeviceId();
-
-    final data = await _remoteDataSource.signUp(
-      username: username,
-      email: email,
-      password: password,
-      deviceId: deviceId,
-      profileImagePath: profileImagePath,
-    );
-
-    return _saveSessionAndCreateUser(
-      data: data,
-      fallbackEmail: email,
-      fallbackUsername: username,
-    );
-  }
-
-  Future<UserModel?> _saveSessionAndCreateUser({
+  Future<UserModel?> _saveSessionAndBuildUser({
     required Map<String, dynamic> data,
     required String fallbackEmail,
     String? fallbackUsername,
@@ -81,13 +29,12 @@ class AuthRepositoryImpl implements AuthRepository {
     final userEmail = (userData['email'] as String?) ?? fallbackEmail;
 
     if (token != null && id != null) {
-      final secureStorage = SecureStorageService.instance;
-      await secureStorage.saveAccessToken(token);
-      await secureStorage.saveUserId(id.toString());
-      await secureStorage.setLoggedIn(true);
+      final secure = SecureStorageService.instance;
+      await secure.saveAccessToken(token);
+      await secure.saveUserId(id.toString());
+      await secure.setLoggedIn(true);
 
       final finalUsername = responseUsername ?? fallbackUsername ?? '';
-
       return UserModel(
         id: id.toString(),
         username: finalUsername,
@@ -96,7 +43,159 @@ class AuthRepositoryImpl implements AuthRepository {
         displayName: finalUsername.isNotEmpty ? finalUsername : null,
       );
     }
-
     return null;
+  }
+
+  // ── Social & Email Auth ────────────────────────────────────────────────────
+
+  @override
+  Future<UserModel?> socialSignIn({
+    required String email,
+    required String googleAuthToken,
+  }) async {
+    final deviceId = await _deviceId;
+    final data = await _remoteDataSource.socialSignIn(
+      email: email,
+      deviceId: deviceId,
+      googleAuthToken: googleAuthToken,
+    );
+    return _saveSessionAndBuildUser(data: data, fallbackEmail: email);
+  }
+
+  @override
+  Future<UserModel?> emailSignIn({
+    required String email,
+    required String password,
+  }) async {
+    final deviceId = await _deviceId;
+    final data = await _remoteDataSource.emailSignIn(
+      email: email,
+      password: password,
+      deviceId: deviceId,
+    );
+    return _saveSessionAndBuildUser(data: data, fallbackEmail: email);
+  }
+
+  @override
+  Future<Map<String, dynamic>> signUp({
+    required String username,
+    required String email,
+    required String password,
+    String? profileImagePath,
+  }) async {
+    final deviceId = await _deviceId;
+    return _remoteDataSource.signUp(
+      username: username,
+      email: email,
+      password: password,
+      deviceId: deviceId,
+      profileImagePath: profileImagePath,
+    );
+  }
+
+  // ── OTP Flows ─────────────────────────────────────────────────────────────
+
+  @override
+  Future<void> verifyOtp({required String email, required int otp}) =>
+      _remoteDataSource.verifyOtp(email: email, otp: otp);
+
+  @override
+  Future<void> resendOtp({required String email}) =>
+      _remoteDataSource.resendOtp(email: email);
+
+  // ── Forgot Password Flow ──────────────────────────────────────────────────
+
+  @override
+  Future<void> forgotPassword({required String email}) =>
+      _remoteDataSource.forgotPassword(email: email);
+
+  @override
+  Future<String> verifyForgotPasswordOtp({
+    required String email,
+    required int otp,
+  }) =>
+      _remoteDataSource.verifyForgotPasswordOtp(email: email, otp: otp);
+
+  @override
+  Future<void> resetPassword({
+    required String resetToken,
+    required String newPassword,
+  }) =>
+      _remoteDataSource.resetPassword(
+        resetToken: resetToken,
+        newPassword: newPassword,
+      );
+
+  // ── Guest Login ───────────────────────────────────────────────────────────
+
+  @override
+  Future<UserModel?> guestLogin({required String username}) async {
+    final deviceId = await _deviceId;
+    final data = await _remoteDataSource.guestLogin(
+      deviceId: deviceId,
+      username: username,
+    );
+    // Guest login returns token but no email — use empty fallback
+    return _saveSessionAndBuildUser(
+      data: data,
+      fallbackEmail: '',
+      fallbackUsername: username,
+    );
+  }
+
+  // ── Availability ──────────────────────────────────────────────────────────
+
+  @override
+  Future<Map<String, dynamic>> checkAvailability({
+    String? email,
+    String? username,
+  }) =>
+      _remoteDataSource.checkAvailability(email: email, username: username);
+
+  // ── Account Conflict ──────────────────────────────────────────────────────
+
+  @override
+  Future<Map<String, dynamic>> resolveAccountConflict({
+    required int currentUserId,
+    required int existingUserId,
+    required String email,
+    required String action,
+    String? deviceId,
+  }) =>
+      _remoteDataSource.resolveAccountConflict(
+        currentUserId: currentUserId,
+        existingUserId: existingUserId,
+        email: email,
+        action: action,
+        deviceId: deviceId,
+      );
+
+  // ── JWT-Protected ─────────────────────────────────────────────────────────
+
+  @override
+  Future<Map<String, dynamic>> getProfile() =>
+      _remoteDataSource.getProfile();
+
+  @override
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) =>
+      _remoteDataSource.changePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+
+  @override
+  Future<void> updateUsername({required String username}) =>
+      _remoteDataSource.updateUsername(username: username);
+
+  @override
+  Future<void> logout() async {
+    // Fire API logout (best-effort — don't fail locally if network is down)
+    await _remoteDataSource.logout().catchError((_) {});
+    // Always clear local session
+    final secure = SecureStorageService.instance;
+    await secure.clearAuth();
   }
 }

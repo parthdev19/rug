@@ -7,7 +7,7 @@ class ApiConstants {
   ApiConstants._();
 
   // Base URLs — overridden per environment via EnvConfig
-  static const String devBaseUrl = 'https://g66p29zh-1902.inc1.devtunnels.ms';
+  static const String devBaseUrl = 'https://rbzv2l7n-1902.inc1.devtunnels.ms';
   static const String stagingBaseUrl = 'https://staging-api.rug.game';
   static const String prodBaseUrl = 'https://api.rug.game';
 
@@ -28,10 +28,12 @@ class ApiConstants {
   static const String appVerifyOtp = '/v1/app/auth/verify_otp';
   static const String appResendOtp = '/v1/app/auth/resend_otp';
   static const String appForgotPassword = '/v1/app/auth/forgot_password';
-  static const String appVerifyForgotPasswordOtp = '/v1/app/auth/verify_forgot_password_otp';
+  static const String appVerifyForgotPasswordOtp =
+      '/v1/app/auth/verify_forgot_password_otp';
   static const String appResetPassword = '/v1/app/auth/reset_password';
   static const String appGuestLogin = '/v1/app/auth/guest_login';
-  static const String appResolveAccountConflict = '/v1/app/auth/resolve-account-conflict';
+  static const String appResolveAccountConflict =
+      '/v1/app/auth/resolve-account-conflict';
 
   // Auth Endpoints — JWT Protected
   static const String appGetProfile = '/v1/app/auth/get_profile';
