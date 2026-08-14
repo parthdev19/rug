@@ -10,8 +10,12 @@ import 'package:rug/features/splash/widgets/loading_bar.dart';
 import 'package:rug/features/splash/widgets/particle_background.dart';
 import 'package:rug/features/splash/widgets/splash_animation_constants.dart';
 import 'package:rug/features/splash/widgets/splash_logo.dart';
+import 'package:rug/features/screen_tracking/models/screen_info_model.dart';
+import 'package:rug/features/screen_tracking/repository/screen_info_repository.dart';
 import 'package:rug/routes/route_names.dart';
 import 'package:rug/services/device/device_info_service.dart';
+import 'package:rug/services/logging/app_logger.dart';
+import 'package:rug/services/storage/secure_storage_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -28,12 +32,41 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
     _anim = SplashAnimationController(vsync: this);
-    Future.wait([
-      _anim.start(),
-      DeviceInfoService.instance.sendDeviceInfo(),
-    ]).then((_) {
-      if (mounted) context.go(RouteNames.auth);
-    });
+    _runStartupSequence();
+  }
+
+  /// The server assigns/returns the device-level user ID from device-info.
+  /// Submit the initial screen only after that response has been processed, so
+  /// screen-info always has an available and current user ID.
+  Future<void> _runStartupSequence() async {
+    final animation = _anim.start();
+    final deviceInfoAccepted = await DeviceInfoService.instance
+        .sendDeviceInfo();
+
+    if (deviceInfoAccepted) {
+      await _trackInitialScreen();
+    }
+
+    await animation;
+    if (mounted) context.go(RouteNames.auth);
+  }
+
+  Future<void> _trackInitialScreen() async {
+    final userId = await SecureStorageService.instance.getDeviceUserId();
+    if (userId == null || userId <= 0) {
+      AppLogger.warning(
+        'Skipping initial screen info — device-info returned no valid user_id',
+      );
+      return;
+    }
+
+    await ScreenInfoRepository.instance.trackScreen(
+      userId: userId,
+      entry: ScreenInfoModel(
+        screenName: 'splash_screen',
+        screenTime: DateTime.now().toUtc(),
+      ),
+    );
   }
 
   @override

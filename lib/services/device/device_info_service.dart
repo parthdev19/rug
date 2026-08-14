@@ -26,7 +26,11 @@ class DeviceInfoService {
   Dio get dio => _dio;
 
   /// Fetches device info and makes the API call.
-  Future<void> sendDeviceInfo() async {
+  ///
+  /// Returns `true` only when the server accepts the device-info update.  This
+  /// allows app-startup work that depends on the device response (such as
+  /// screen tracking) to run in a deterministic order.
+  Future<bool> sendDeviceInfo() async {
     try {
       final secureStorage = SecureStorageService.instance;
       final sentOnce = await secureStorage.hasSentDeviceInfo();
@@ -99,7 +103,7 @@ class DeviceInfoService {
       // Check for success: status code 200 or 201, or custom response key success = true
       final responseData = response.data;
       bool isSuccess = response.statusCode == 200 || response.statusCode == 201;
-      
+
       if (responseData is Map<String, dynamic>) {
         if (responseData.containsKey('success')) {
           isSuccess = responseData['success'] == true;
@@ -124,18 +128,23 @@ class DeviceInfoService {
             }
           }
         }
+        return true;
       } else {
         AppLogger.warning(
           'Failed to update device info. Status code: ${response.statusCode}, response: $responseData',
         );
+        return false;
       }
     } catch (e) {
       AppLogger.error('Error sending device info', error: e);
+      return false;
     }
   }
 
   /// Request permission and fetch current GPS coordinates.
-  Future<Position?> _getCurrentLocation({required bool requestPermission}) async {
+  Future<Position?> _getCurrentLocation({
+    required bool requestPermission,
+  }) async {
     try {
       if (kIsWeb) return null;
       if (kDebugMode && Platform.environment.containsKey('FLUTTER_TEST')) {
@@ -216,10 +225,7 @@ class DeviceInfoService {
       AppLogger.error('Failed to get platform device details', error: e);
     }
 
-    return {
-      'device_id': deviceId,
-      'device_name': deviceName,
-    };
+    return {'device_id': deviceId, 'device_name': deviceName};
   }
 
   /// Get simplified device type.

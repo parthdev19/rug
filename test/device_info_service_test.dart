@@ -89,7 +89,8 @@ void main() {
       expect(await secureStorage.getInstallVersion(), null);
 
       // Trigger API call
-      await DeviceInfoService.instance.sendDeviceInfo();
+      final accepted = await DeviceInfoService.instance.sendDeviceInfo();
+      expect(accepted, isTrue);
 
       // Verify the request details
       expect(mockAdapter.lastRequestOptions, isNotNull);
@@ -126,7 +127,8 @@ void main() {
       });
 
       // Trigger API call
-      await DeviceInfoService.instance.sendDeviceInfo();
+      final accepted = await DeviceInfoService.instance.sendDeviceInfo();
+      expect(accepted, isTrue);
 
       // Verify the request details
       expect(mockAdapter.lastRequestOptions, isNotNull);
@@ -154,7 +156,8 @@ void main() {
       expect(await secureStorage.hasSentDeviceInfo(), false);
 
       // Trigger API call
-      await DeviceInfoService.instance.sendDeviceInfo();
+      final accepted = await DeviceInfoService.instance.sendDeviceInfo();
+      expect(accepted, isFalse);
 
       // Verify state remains false
       expect(await secureStorage.hasSentDeviceInfo(), false);
