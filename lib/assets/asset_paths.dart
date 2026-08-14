@@ -26,7 +26,7 @@ class AssetPaths {
   // static const String cardBack = '$_cards/card_back.png';
 
   // Sounds
-  // static const String cardDeal = '$_sounds/card_deal.mp3';
+  static const String splashCardSwipe = '$sounds/splash_card_swipe.wav';
   // static const String cardFlip = '$_sounds/card_flip.mp3';
   // static const String cardShuffle = '$_sounds/card_shuffle.mp3';
   // static const String win = '$_sounds/win.mp3';

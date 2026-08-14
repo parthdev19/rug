@@ -10,7 +10,8 @@ class GuestUsernameScreen extends ConsumerStatefulWidget {
   const GuestUsernameScreen({super.key});
 
   @override
-  ConsumerState<GuestUsernameScreen> createState() => _GuestUsernameScreenState();
+  ConsumerState<GuestUsernameScreen> createState() =>
+      _GuestUsernameScreenState();
 }
 
 class _GuestUsernameScreenState extends ConsumerState<GuestUsernameScreen> {
@@ -31,10 +32,10 @@ class _GuestUsernameScreenState extends ConsumerState<GuestUsernameScreen> {
       final success = await ref
           .read(guestControllerProvider.notifier)
           .registerGuest(username);
-      
+
       if (success && mounted) {
-        // Clear auth screen stack and go directly to home
-        context.go(RouteNames.home);
+        // Clear the auth stack, show the post-login loader, then enter home.
+        context.go(RouteNames.postLoginLoading);
       }
     }
   }
@@ -55,7 +56,9 @@ class _GuestUsernameScreenState extends ConsumerState<GuestUsernameScreen> {
               style: const TextStyle(color: Colors.white),
             ),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -97,7 +100,10 @@ class _GuestUsernameScreenState extends ConsumerState<GuestUsernameScreen> {
             child: Center(
               child: SingleChildScrollView(
                 physics: const ClampingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 16.0,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(

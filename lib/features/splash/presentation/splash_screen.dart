@@ -1,8 +1,11 @@
 /// Cinematic launch experience for RUG.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rug/assets/asset_paths.dart';
 import 'package:rug/features/splash/controller/splash_controller.dart';
 import 'package:rug/features/splash/widgets/floating_card_animation.dart';
 import 'package:rug/features/splash/widgets/glow_layer.dart';
@@ -15,6 +18,7 @@ import 'package:rug/features/screen_tracking/repository/screen_info_repository.d
 import 'package:rug/routes/route_names.dart';
 import 'package:rug/services/device/device_info_service.dart';
 import 'package:rug/services/logging/app_logger.dart';
+import 'package:rug/services/audio/sound_manager.dart';
 import 'package:rug/services/storage/secure_storage_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -39,7 +43,11 @@ class _SplashScreenState extends State<SplashScreen>
   /// Submit the initial screen only after that response has been processed, so
   /// screen-info always has an available and current user ID.
   Future<void> _runStartupSequence() async {
-    final animation = _anim.start();
+    final animation = _anim.start(
+      onCardFlightStart: () {
+        unawaited(SoundManager.instance.playSfx(AssetPaths.splashCardSwipe));
+      },
+    );
     final deviceInfoAccepted = await DeviceInfoService.instance
         .sendDeviceInfo();
 

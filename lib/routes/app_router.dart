@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rug/features/auth/presentation/auth_screen.dart';
+import 'package:rug/features/auth/presentation/auth_loading_screen.dart';
 import 'package:rug/features/auth/presentation/email_sign_in_screen.dart';
 import 'package:rug/features/auth/presentation/register_screen.dart';
 import 'package:rug/features/auth/presentation/forgot_password_screen.dart';
@@ -23,29 +24,11 @@ import 'package:rug/routes/route_names.dart';
 import 'package:rug/features/screen_tracking/service/screen_tracking_service.dart';
 import 'package:rug/shared/providers/common_providers.dart';
 
-/// GoRouter provider — reads auth state for redirects.
+/// GoRouter provider for the app's navigation graph.
 final routerProvider = Provider<GoRouter>((ref) {
-  final isAuthenticated = ref.watch(isAuthenticatedProvider);
-
   final router = GoRouter(
     initialLocation: RouteNames.splash,
     debugLogDiagnostics: true,
-    redirect: (context, state) {
-      final currentPath = state.uri.path;
-      final isOnAuth = currentPath.startsWith(RouteNames.auth);
-      final isOnSplash = currentPath == RouteNames.splash;
-
-      // Allow splash screen always
-      if (isOnSplash) return null;
-
-      // Not authenticated → redirect to auth
-      if (!isAuthenticated && !isOnAuth) return RouteNames.auth;
-
-      // Authenticated but on auth screen → redirect to home
-      if (isAuthenticated && isOnAuth) return RouteNames.home;
-
-      return null;
-    },
     routes: [
       // Splash
       GoRoute(
@@ -69,23 +52,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                 child: const EmailSignInScreen(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(0.0, 0.05);
-                  const end = Offset.zero;
-                  const curve = Curves.easeInOut;
+                      const begin = Offset(0.0, 0.05);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
 
-                  final tween = Tween(begin: begin, end: end).chain(
-                    CurveTween(curve: curve),
-                  );
-                  final offsetAnimation = animation.drive(tween);
+                      final tween = Tween(
+                        begin: begin,
+                        end: end,
+                      ).chain(CurveTween(curve: curve));
+                      final offsetAnimation = animation.drive(tween);
 
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    ),
-                  );
-                },
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
               );
             },
           ),
@@ -98,23 +82,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                 child: const RegisterScreen(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(0.0, 0.05);
-                  const end = Offset.zero;
-                  const curve = Curves.easeInOut;
+                      const begin = Offset(0.0, 0.05);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
 
-                  final tween = Tween(begin: begin, end: end).chain(
-                    CurveTween(curve: curve),
-                  );
-                  final offsetAnimation = animation.drive(tween);
+                      final tween = Tween(
+                        begin: begin,
+                        end: end,
+                      ).chain(CurveTween(curve: curve));
+                      final offsetAnimation = animation.drive(tween);
 
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    ),
-                  );
-                },
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
               );
             },
           ),
@@ -127,23 +112,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                 child: const ForgotPasswordScreen(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(0.0, 0.05);
-                  const end = Offset.zero;
-                  const curve = Curves.easeInOut;
+                      const begin = Offset(0.0, 0.05);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
 
-                  final tween = Tween(begin: begin, end: end).chain(
-                    CurveTween(curve: curve),
-                  );
-                  final offsetAnimation = animation.drive(tween);
+                      final tween = Tween(
+                        begin: begin,
+                        end: end,
+                      ).chain(CurveTween(curve: curve));
+                      final offsetAnimation = animation.drive(tween);
 
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    ),
-                  );
-                },
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
               );
             },
           ),
@@ -156,23 +142,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                 child: const OtpVerificationScreen(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(0.0, 0.05);
-                  const end = Offset.zero;
-                  const curve = Curves.easeInOut;
+                      const begin = Offset(0.0, 0.05);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
 
-                  final tween = Tween(begin: begin, end: end).chain(
-                    CurveTween(curve: curve),
-                  );
-                  final offsetAnimation = animation.drive(tween);
+                      final tween = Tween(
+                        begin: begin,
+                        end: end,
+                      ).chain(CurveTween(curve: curve));
+                      final offsetAnimation = animation.drive(tween);
 
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    ),
-                  );
-                },
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
               );
             },
           ),
@@ -185,23 +172,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                 child: const ResetPasswordScreen(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(0.0, 0.05);
-                  const end = Offset.zero;
-                  const curve = Curves.easeInOut;
+                      const begin = Offset(0.0, 0.05);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
 
-                  final tween = Tween(begin: begin, end: end).chain(
-                    CurveTween(curve: curve),
-                  );
-                  final offsetAnimation = animation.drive(tween);
+                      final tween = Tween(
+                        begin: begin,
+                        end: end,
+                      ).chain(CurveTween(curve: curve));
+                      final offsetAnimation = animation.drive(tween);
 
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    ),
-                  );
-                },
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
               );
             },
           ),
@@ -214,23 +202,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                 child: const GuestUsernameScreen(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(0.0, 0.05);
-                  const end = Offset.zero;
-                  const curve = Curves.easeInOut;
+                      const begin = Offset(0.0, 0.05);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
 
-                  final tween = Tween(begin: begin, end: end).chain(
-                    CurveTween(curve: curve),
-                  );
-                  final offsetAnimation = animation.drive(tween);
+                      final tween = Tween(
+                        begin: begin,
+                        end: end,
+                      ).chain(CurveTween(curve: curve));
+                      final offsetAnimation = animation.drive(tween);
 
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    ),
-                  );
-                },
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
               );
             },
           ),
@@ -244,23 +233,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                 child: SignUpOtpVerificationScreen(email: email),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(0.0, 0.05);
-                  const end = Offset.zero;
-                  const curve = Curves.easeInOut;
+                      const begin = Offset(0.0, 0.05);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
 
-                  final tween = Tween(begin: begin, end: end).chain(
-                    CurveTween(curve: curve),
-                  );
-                  final offsetAnimation = animation.drive(tween);
+                      final tween = Tween(
+                        begin: begin,
+                        end: end,
+                      ).chain(CurveTween(curve: curve));
+                      final offsetAnimation = animation.drive(tween);
 
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    ),
-                  );
-                },
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
               );
             },
           ),
@@ -273,6 +263,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RouteNames.home,
         name: 'home',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.postLoginLoading,
+        name: 'postLoginLoading',
+        builder: (context, state) => const AuthLoadingScreen(),
       ),
       GoRoute(
         path: RouteNames.profile,
@@ -293,24 +288,26 @@ final routerProvider = Provider<GoRouter>((ref) {
           return CustomTransitionPage<void>(
             key: state.pageKey,
             child: const CreateGameScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              const begin = Offset(0.0, 0.05);
-              const end = Offset.zero;
-              const curve = Curves.easeInOut;
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(0.0, 0.05);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOut;
 
-              final tween = Tween(begin: begin, end: end).chain(
-                CurveTween(curve: curve),
-              );
-              final offsetAnimation = animation.drive(tween);
+                  final tween = Tween(
+                    begin: begin,
+                    end: end,
+                  ).chain(CurveTween(curve: curve));
+                  final offsetAnimation = animation.drive(tween);
 
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: offsetAnimation,
-                  child: child,
-                ),
-              );
-            },
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    ),
+                  );
+                },
           );
         },
       ),
@@ -321,12 +318,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           return CustomTransitionPage<void>(
             key: state.pageKey,
             child: const GameTableScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
           );
         },
       ),
@@ -421,4 +416,3 @@ class _PlaceholderScreen extends StatelessWidget {
     );
   }
 }
-

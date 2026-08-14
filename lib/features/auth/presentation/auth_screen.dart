@@ -30,7 +30,9 @@ class AuthScreen extends ConsumerWidget {
               style: const TextStyle(color: Colors.white),
             ),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -61,9 +63,7 @@ class AuthScreen extends ConsumerWidget {
               return SingleChildScrollView(
                 physics: const ClampingScrollPhysics(),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: IntrinsicHeight(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -82,10 +82,10 @@ class AuthScreen extends ConsumerWidget {
 
                           // ── HERO CARD ────────────────────────────────────────────
                           SizedBox(
-                            height: constraints.maxHeight * (isSmallScreen ? 0.38 : 0.43),
-                            child: const Center(
-                              child: HeroCard(),
-                            ),
+                            height:
+                                constraints.maxHeight *
+                                (isSmallScreen ? 0.38 : 0.43),
+                            child: const Center(child: HeroCard()),
                           ),
 
                           Spacer(flex: isSmallScreen ? 3 : 4),
@@ -93,10 +93,13 @@ class AuthScreen extends ConsumerWidget {
                           // ── GOOGLE BUTTON ────────────────────────────────────────
                           GoogleButton(
                             isLoading: authState.isLoading,
-                            onPressed: () {
-                              ref
+                            onPressed: () async {
+                              final success = await ref
                                   .read(authControllerProvider.notifier)
                                   .signInWithGoogle();
+                              if (success && context.mounted) {
+                                context.go(RouteNames.postLoginLoading);
+                              }
                             },
                           ),
 
@@ -166,7 +169,9 @@ class _AuthTitle extends StatelessWidget {
                 blurRadius: 18,
               ),
               Shadow(
-                color: SplashAnimationConstants.brightGold.withValues(alpha: 0.30),
+                color: SplashAnimationConstants.brightGold.withValues(
+                  alpha: 0.30,
+                ),
                 blurRadius: 36,
               ),
             ],

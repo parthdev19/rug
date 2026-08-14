@@ -16,6 +16,7 @@ class RouteNames {
   static const String signUpVerifyOtp = '/auth/sign-up-verify-otp';
   static const String resetPassword = '/auth/reset-password';
   static const String guestUsername = '/auth/guest-username';
+  static const String postLoginLoading = '/loading';
 
   // Main
   static const String home = '/home';

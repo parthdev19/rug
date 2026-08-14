@@ -381,13 +381,14 @@ class SplashAnimationController {
   // ── Public API ────────────────────────────────────────────────────────────
 
   /// Runs the full sequence and resolves when the loading bar is visible.
-  Future<void> start() async {
+  Future<void> start({VoidCallback? onCardFlightStart}) async {
     // Step 1: Background + logo/tagline entrance.
     await _entry.forward();
 
     // Step 2: Card deal begins 0ms after entry ends (entry already had 500ms
     // delay baked in via dealDelay — both controllers fire together for
     // precise timing, but the card's appearance starts from off-screen).
+    onCardFlightStart?.call();
     await Future.wait([_cardFlight.forward(), _rotation.forward()]);
 
     // Step 3: Card has landed — run bounce + start idle loops + fill loading bar.

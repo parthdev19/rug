@@ -55,7 +55,7 @@ class _EmailSignInScreenState extends ConsumerState<EmailSignInScreen> {
         });
 
         if (success) {
-          context.go(RouteNames.home);
+          context.go(RouteNames.postLoginLoading);
         } else {
           final authState = ref.read(authControllerProvider);
           final errorMsg = authState.error != null
@@ -120,9 +120,7 @@ class _EmailSignInScreenState extends ConsumerState<EmailSignInScreen> {
               return SingleChildScrollView(
                 physics: const ClampingScrollPhysics(),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: IntrinsicHeight(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -166,7 +164,9 @@ class _EmailSignInScreenState extends ConsumerState<EmailSignInScreen> {
                               controller: _emailController,
                               focusNode: _emailFocusNode,
                               onFieldSubmitted: (_) {
-                                FocusScope.of(context).requestFocus(_passwordFocusNode);
+                                FocusScope.of(
+                                  context,
+                                ).requestFocus(_passwordFocusNode);
                               },
                             ),
 
