@@ -26,9 +26,16 @@ const _kGameScreenRoutes = {
   'onlineMatch',
 };
 
+/// Routes excluded from automatic screen tracking.
+///
+/// 'splash' is excluded because [SplashScreen._runStartupSequence] tracks it
+/// deterministically *after* device-info has succeeded, guaranteeing the
+/// correct API call order.  Letting the router-attached tracker fire on
+/// 'splash' would send screen-info before device-info — the bug.
+const _kSkippedRoutes = {'splash'};
+
 /// Top-level non-game route names that signal the user has left the game.
 const _kNonGameRoutes = {
-  'splash',
   'auth',
   'login',
   'register',
@@ -162,6 +169,9 @@ class ScreenTracker {
     }
 
     if (routeName == null) return;
+
+    // Skip routes that manage their own tracking (e.g. splash).
+    if (_kSkippedRoutes.contains(routeName)) return;
 
     final screenName = formatScreenName(routeName);
     final isGameRoute = _kGameScreenRoutes.contains(routeName);
