@@ -15,6 +15,7 @@ import 'package:rug/features/auth/presentation/forgot_password_screen.dart';
 import 'package:rug/features/auth/presentation/otp_verification_screen.dart';
 import 'package:rug/features/auth/presentation/reset_password_screen.dart';
 import 'package:rug/features/auth/presentation/guest_username_screen.dart';
+import 'package:rug/features/auth/presentation/set_username_screen.dart';
 import 'package:rug/features/auth/presentation/sign_up_otp_verification_screen.dart';
 import 'package:rug/features/home/presentation/home_screen.dart';
 import 'package:rug/features/create_game/presentation/create_game_screen.dart';
@@ -255,6 +256,38 @@ final routerProvider = Provider<GoRouter>((ref) {
             },
           ),
         ],
+      ),
+
+      // Set Username (mandatory onboarding — shown when is_username_set: false)
+      GoRoute(
+        path: RouteNames.setUsername,
+        name: 'setUsername',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: const SetUsernameScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(0.0, 0.05);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOut;
+
+                  final tween = Tween(
+                    begin: begin,
+                    end: end,
+                  ).chain(CurveTween(curve: curve));
+                  final offsetAnimation = animation.drive(tween);
+
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    ),
+                  );
+                },
+          );
+        },
       ),
 
       // Main App (Shell route for bottom nav)

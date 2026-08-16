@@ -4,27 +4,40 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rug/features/splash/widgets/splash_animation_constants.dart';
 import 'package:rug/routes/route_names.dart';
+import 'package:rug/shared/providers/common_providers.dart';
 
-class AuthLoadingScreen extends StatefulWidget {
+class AuthLoadingScreen extends ConsumerStatefulWidget {
   const AuthLoadingScreen({super.key});
 
   @override
-  State<AuthLoadingScreen> createState() => _AuthLoadingScreenState();
+  ConsumerState<AuthLoadingScreen> createState() => _AuthLoadingScreenState();
 }
 
-class _AuthLoadingScreenState extends State<AuthLoadingScreen> {
+class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
   @override
   void initState() {
     super.initState();
-    _openHome();
+    _navigate();
   }
 
-  Future<void> _openHome() async {
+  Future<void> _navigate() async {
+    // Brief intentional pause for visual polish.
     await Future<void>.delayed(const Duration(milliseconds: 700));
-    if (mounted) context.go(RouteNames.home);
+    if (!mounted) return;
+
+    final user = ref.read(currentUserProvider);
+
+    // If the backend flagged that no username has been set yet, redirect to
+    // the set-username onboarding screen before entering the home flow.
+    if (user != null && !user.isUsernameSet) {
+      context.go(RouteNames.setUsername);
+    } else {
+      context.go(RouteNames.home);
+    }
   }
 
   @override
@@ -58,3 +71,4 @@ class _AuthLoadingScreenState extends State<AuthLoadingScreen> {
     );
   }
 }
+

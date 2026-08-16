@@ -32,6 +32,7 @@ class UserModel {
     this.totalWins,
     this.totalGames,
     this.createdAt,
+    this.isUsernameSet = true,
   });
 
   final String id;
@@ -43,6 +44,10 @@ class UserModel {
   final int? totalWins;
   final int? totalGames;
   final DateTime? createdAt;
+
+  /// Whether the backend has a username set for this user.
+  /// False means they must complete the set-username onboarding step.
+  final bool isUsernameSet;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() {

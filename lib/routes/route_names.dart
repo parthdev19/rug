@@ -17,6 +17,7 @@ class RouteNames {
   static const String resetPassword = '/auth/reset-password';
   static const String guestUsername = '/auth/guest-username';
   static const String postLoginLoading = '/loading';
+  static const String setUsername = '/auth/set-username';
 
   // Main
   static const String home = '/home';

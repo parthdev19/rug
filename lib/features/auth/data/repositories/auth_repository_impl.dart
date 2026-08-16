@@ -34,6 +34,12 @@ class AuthRepositoryImpl implements AuthRepository {
       await secure.saveUserId(id.toString());
       await secure.setLoggedIn(true);
 
+      // is_username_set can sit at the top-level OR inside the user object.
+      // Default to true so existing flows remain unaffected.
+      final isUsernameSet =
+          (data['is_username_set'] ?? userData['is_username_set']) as bool? ??
+          true;
+
       final finalUsername = responseUsername ?? fallbackUsername ?? '';
       return UserModel(
         id: id.toString(),
@@ -41,6 +47,7 @@ class AuthRepositoryImpl implements AuthRepository {
         email: userEmail,
         avatarUrl: profile,
         displayName: finalUsername.isNotEmpty ? finalUsername : null,
+        isUsernameSet: isUsernameSet,
       );
     }
     return null;
