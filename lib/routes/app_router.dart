@@ -25,11 +25,54 @@ import 'package:rug/routes/route_names.dart';
 import 'package:rug/features/screen_tracking/service/screen_tracking_service.dart';
 import 'package:rug/shared/providers/common_providers.dart';
 
+/// Notifier that triggers GoRouter redirect re-evaluation whenever auth or user state changes.
+class RouterNotifier extends ChangeNotifier {
+  RouterNotifier(this._ref) {
+    _ref.listen(currentUserProvider, (_, __) => notifyListeners());
+    _ref.listen(isAuthenticatedProvider, (_, __) => notifyListeners());
+  }
+  final Ref _ref;
+}
+
+final routerNotifierProvider =
+    Provider<RouterNotifier>((ref) => RouterNotifier(ref));
+
 /// GoRouter provider for the app's navigation graph.
 final routerProvider = Provider<GoRouter>((ref) {
+  final notifier = ref.watch(routerNotifierProvider);
+
   final router = GoRouter(
     initialLocation: RouteNames.splash,
     debugLogDiagnostics: true,
+    refreshListenable: notifier,
+    redirect: (context, state) {
+      final user = ref.read(currentUserProvider);
+      final isAuth = ref.read(isAuthenticatedProvider);
+      final location = state.uri.path;
+
+      // If user is authenticated, but user is null or is_username_set: false or username is empty/null,
+      // force redirection to setUsername screen unless they're already on setUsername, postLoginLoading, or splash.
+      if (isAuth &&
+          (user == null ||
+              !user.isUsernameSet ||
+              user.username.trim().isEmpty)) {
+        if (location != RouteNames.setUsername &&
+            location != RouteNames.postLoginLoading &&
+            location != RouteNames.splash) {
+          return RouteNames.setUsername;
+        }
+      }
+
+      // If user has set a username and attempts to visit setUsername, redirect to home.
+      if (location == RouteNames.setUsername &&
+          user != null &&
+          user.isUsernameSet &&
+          user.username.trim().isNotEmpty) {
+        return RouteNames.home;
+      }
+
+      return null;
+    },
     routes: [
       // Splash
       GoRoute(

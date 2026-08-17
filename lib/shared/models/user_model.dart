@@ -6,13 +6,36 @@ library;
 
 class UserModel {
 
+  /// Helper to safely determine whether a username has been set based on:
+  /// "is_username_set": false OR "username": null / empty.
+  static bool parseIsUsernameSet(dynamic rawIsUsernameSet, dynamic rawUsername) {
+    if (rawUsername == null) return false;
+    final usernameStr = rawUsername.toString().trim();
+    if (usernameStr.isEmpty) return false;
+
+    if (rawIsUsernameSet != null) {
+      if (rawIsUsernameSet is bool && !rawIsUsernameSet) return false;
+      if (rawIsUsernameSet is num && rawIsUsernameSet == 0) return false;
+      if (rawIsUsernameSet is String) {
+        final lower = rawIsUsernameSet.toLowerCase().trim();
+        if (lower == 'false' || lower == '0') return false;
+      }
+    }
+
+    return true;
+  }
+
   /// Creates from JSON.
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final rawUsername = json['username'];
+    final username = rawUsername is String ? rawUsername : '';
+    final rawIsUsernameSet = json['is_username_set'] ?? json['isUsernameSet'];
+
     return UserModel(
-      id: json['id'] as String,
-      username: json['username'] as String,
+      id: json['id'].toString(),
+      username: username,
       email: json['email'] as String?,
-      avatarUrl: json['avatar_url'] as String?,
+      avatarUrl: (json['avatar_url'] ?? json['profile'] ?? json['profile_url']) as String?,
       displayName: json['display_name'] as String?,
       level: json['level'] as int?,
       totalWins: json['total_wins'] as int?,
@@ -20,6 +43,7 @@ class UserModel {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
+      isUsernameSet: parseIsUsernameSet(rawIsUsernameSet, rawUsername),
     );
   }
   const UserModel({

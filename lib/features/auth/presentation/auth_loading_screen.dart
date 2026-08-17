@@ -31,9 +31,9 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
 
     final user = ref.read(currentUserProvider);
 
-    // If the backend flagged that no username has been set yet, redirect to
-    // the set-username onboarding screen before entering the home flow.
-    if (user != null && !user.isUsernameSet) {
+    // If user is null, or backend flagged is_username_set: false, or username is null/empty,
+    // redirect to the set-username onboarding screen before entering the home flow.
+    if (user == null || !user.isUsernameSet || user.username.trim().isEmpty) {
       context.go(RouteNames.setUsername);
     } else {
       context.go(RouteNames.home);

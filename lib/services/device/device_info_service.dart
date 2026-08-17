@@ -35,6 +35,10 @@ class DeviceInfoService {
       final secureStorage = SecureStorageService.instance;
       final sentOnce = await secureStorage.hasSentDeviceInfo();
 
+      // Read the user_id that was returned by the server on a previous call.
+      // This will be null on the very first launch.
+      final storedUserId = await secureStorage.getDeviceUserId();
+
       // Get app version info
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = packageInfo.version;
@@ -54,7 +58,7 @@ class DeviceInfoService {
       Map<String, dynamic> payload;
 
       if (!sentOnce) {
-        // Fetch full device details
+        // First launch: send full device details.
         final deviceDetails = await _getDeviceDetails();
         final deviceType = _getDeviceType();
         final language = _getLanguage();
@@ -72,9 +76,12 @@ class DeviceInfoService {
           'current_version': currentVersion,
           'install_version': installVersion,
           'device_name': deviceDetails['device_name'],
+          // Include user_id only when we already have one stored (rare on
+          // first launch, but possible after a reinstall without clearing prefs).
+          if (storedUserId != null) 'user_id': storedUserId,
         };
       } else {
-        // Subsequent launch: only send device_id, lat, long, current_version, install_version
+        // Subsequent launches: lightweight payload + always include user_id.
         final deviceDetails = await _getDeviceDetails();
         payload = {
           'device_id': deviceDetails['device_id'],
@@ -82,10 +89,15 @@ class DeviceInfoService {
           'long': long,
           'current_version': currentVersion,
           'install_version': installVersion,
+          // Always send the stored user_id on subsequent calls so the backend
+          // can associate this device ping with the known user.
+          if (storedUserId != null) 'user_id': storedUserId,
         };
       }
 
-      AppLogger.info('Sending device info (first_time: ${!sentOnce}) to API');
+      AppLogger.info(
+        'Sending device info (first_time: ${!sentOnce}, user_id: $storedUserId) to API',
+      );
       AppLogger.debug('Device info payload: $payload');
 
       final response = await _dio.post(
@@ -115,6 +127,8 @@ class DeviceInfoService {
         if (!sentOnce) {
           await secureStorage.setSentDeviceInfo(true);
         }
+        // Always persist the user_id returned by the server so future calls
+        // can include it in the payload.
         if (responseData is Map<String, dynamic>) {
           final data = responseData['data'];
           if (data is Map<String, dynamic>) {
@@ -124,7 +138,9 @@ class DeviceInfoService {
                 : int.tryParse(rawUserId?.toString() ?? '');
             if (userId != null && userId > 0) {
               await secureStorage.saveDeviceUserId(userId);
-              AppLogger.debug('Device user_id saved: $userId');
+              AppLogger.debug(
+                'Device user_id stored/updated: $userId',
+              );
             }
           }
         }

@@ -22,10 +22,11 @@ class AuthRepositoryImpl implements AuthRepository {
     final userData = data['user'] is Map<String, dynamic>
         ? data['user'] as Map<String, dynamic>
         : data;
-    final token = (data['token'] ?? data['access_token']) as String?;
-    final id = userData['id'] ?? data['user_id'];
-    final responseUsername = userData['username'] as String?;
-    final profile = (userData['profile'] ?? userData['avatar_url']) as String?;
+    final token = (data['token'] ?? data['access_token'] ?? userData['token']) as String?;
+    final id = userData['id'] ?? data['user_id'] ?? data['id'];
+    final rawResponseUsername = userData['username'] ?? data['username'];
+    final responseUsernameStr = rawResponseUsername is String ? rawResponseUsername : null;
+    final profile = (userData['profile'] ?? userData['avatar_url'] ?? userData['profile_url'] ?? data['profile_url']) as String?;
     final userEmail = (userData['email'] as String?) ?? fallbackEmail;
 
     if (token != null && id != null) {
@@ -34,13 +35,18 @@ class AuthRepositoryImpl implements AuthRepository {
       await secure.saveUserId(id.toString());
       await secure.setLoggedIn(true);
 
-      // is_username_set can sit at the top-level OR inside the user object.
-      // Default to true so existing flows remain unaffected.
-      final isUsernameSet =
-          (data['is_username_set'] ?? userData['is_username_set']) as bool? ??
-          true;
+      // is_username_set can sit at top-level OR inside the user object.
+      final rawIsUsernameSet = data['is_username_set'] ??
+          userData['is_username_set'] ??
+          data['isUsernameSet'] ??
+          userData['isUsernameSet'];
 
-      final finalUsername = responseUsername ?? fallbackUsername ?? '';
+      final finalUsername = responseUsernameStr ?? fallbackUsername ?? '';
+      final isUsernameSet = UserModel.parseIsUsernameSet(
+        rawIsUsernameSet,
+        rawResponseUsername,
+      );
+
       return UserModel(
         id: id.toString(),
         username: finalUsername,
