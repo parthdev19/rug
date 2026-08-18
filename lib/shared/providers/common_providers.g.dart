@@ -218,7 +218,7 @@ final class IsAuthenticatedProvider
         argument: null,
         retry: null,
         name: r'isAuthenticatedProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -239,7 +239,7 @@ final class IsAuthenticatedProvider
   }
 }
 
-String _$isAuthenticatedHash() => r'815af235eafa8efa5a6fd3970f780a687696744d';
+String _$isAuthenticatedHash() => r'187e39285dab104e595c5112f8e324a287ec292f';
 
 /// Whether the user is currently authenticated.
 
@@ -276,7 +276,7 @@ final class CurrentUserIdProvider
         argument: null,
         retry: null,
         name: r'currentUserIdProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -297,7 +297,7 @@ final class CurrentUserIdProvider
   }
 }
 
-String _$currentUserIdHash() => r'026b56440ac184fce9cc8f48ce204b699badfc08';
+String _$currentUserIdHash() => r'e2df47e66eb21f94c3a564f75298278fff4c7929';
 
 /// Current user ID (null when not logged in).
 
@@ -334,7 +334,7 @@ final class CurrentUserProvider
         argument: null,
         retry: null,
         name: r'currentUserProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -355,7 +355,7 @@ final class CurrentUserProvider
   }
 }
 
-String _$currentUserHash() => r'2a2e476d2d49c0542b0d7d7b1dc6b6a3c1dc3dd0';
+String _$currentUserHash() => r'561dac04dc1357253d7eb4d7e3450ac87bc1c042';
 
 /// Current logged in user model (null when not logged in).
 

@@ -10,12 +10,12 @@ import 'package:rug/services/storage/secure_storage_service.dart';
 
 part 'auth_controller.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 AuthRepository authRepository(Ref ref) {
   return AuthRepositoryImpl();
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 GoogleSignIn googleSignIn(Ref ref) {
   return GoogleSignIn(
     serverClientId:
@@ -23,7 +23,7 @@ GoogleSignIn googleSignIn(Ref ref) {
   );
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class AuthController extends _$AuthController {
   @override
   AsyncValue<void> build() {
@@ -38,7 +38,9 @@ class AuthController extends _$AuthController {
       final token = await secure.getAccessToken();
 
       if (!isLoggedIn || token == null || token.isEmpty) {
-        ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
+        if (ref.mounted) {
+          ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
+        }
         return null;
       }
 
@@ -46,9 +48,11 @@ class AuthController extends _$AuthController {
       final profileData = await repository.getProfile();
       final user = UserModel.fromJson(profileData);
 
-      ref.read(currentUserProvider.notifier).setUser(user);
-      ref.read(currentUserIdProvider.notifier).setUserId(user.id);
-      ref.read(isAuthenticatedProvider.notifier).setAuthenticated(true);
+      if (ref.mounted) {
+        ref.read(currentUserProvider.notifier).setUser(user);
+        ref.read(currentUserIdProvider.notifier).setUserId(user.id);
+        ref.read(isAuthenticatedProvider.notifier).setAuthenticated(true);
+      }
 
       return user;
     } catch (e, st) {
@@ -60,9 +64,11 @@ class AuthController extends _$AuthController {
       final secure = SecureStorageService.instance;
       await secure.clearAuth();
 
-      ref.read(currentUserProvider.notifier).clearUser();
-      ref.read(currentUserIdProvider.notifier).clearUserId();
-      ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
+      if (ref.mounted) {
+        ref.read(currentUserProvider.notifier).clearUser();
+        ref.read(currentUserIdProvider.notifier).clearUserId();
+        ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
+      }
 
       return null;
     }
@@ -169,21 +175,24 @@ class AuthController extends _$AuthController {
       // Also sign out from Google if applicable
       await ref.read(googleSignInProvider).signOut().catchError((_) => null);
 
-      // Clear all local auth state
-      ref.read(currentUserProvider.notifier).clearUser();
-      ref.read(currentUserIdProvider.notifier).clearUserId();
-      ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
-
-      state = const AsyncData(null);
+      if (ref.mounted) {
+        // Clear all local auth state
+        ref.read(currentUserProvider.notifier).clearUser();
+        ref.read(currentUserIdProvider.notifier).clearUserId();
+        ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
+        state = const AsyncData(null);
+      }
     } catch (e, st) {
       AppLogger.error('Logout failed', error: e, stackTrace: st);
       // Even if API fails, clear local state
       final secure = SecureStorageService.instance;
       await secure.clearAuth();
-      ref.read(currentUserProvider.notifier).clearUser();
-      ref.read(currentUserIdProvider.notifier).clearUserId();
-      ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
-      state = const AsyncData(null);
+      if (ref.mounted) {
+        ref.read(currentUserProvider.notifier).clearUser();
+        ref.read(currentUserIdProvider.notifier).clearUserId();
+        ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
+        state = const AsyncData(null);
+      }
     }
   }
 

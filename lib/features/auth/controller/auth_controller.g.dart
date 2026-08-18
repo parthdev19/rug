@@ -21,7 +21,7 @@ final class AuthRepositoryProvider
         argument: null,
         retry: null,
         name: r'authRepositoryProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -48,7 +48,7 @@ final class AuthRepositoryProvider
   }
 }
 
-String _$authRepositoryHash() => r'a8767550d220ede9bb05149c073a651c4422d5ef';
+String _$authRepositoryHash() => r'ffe1af47574887c8dc0b233590348dd37b87946c';
 
 @ProviderFor(googleSignIn)
 final googleSignInProvider = GoogleSignInProvider._();
@@ -62,7 +62,7 @@ final class GoogleSignInProvider
         argument: null,
         retry: null,
         name: r'googleSignInProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -89,7 +89,7 @@ final class GoogleSignInProvider
   }
 }
 
-String _$googleSignInHash() => r'80d0b04389e2df1aa18a783251147be50dd311d5';
+String _$googleSignInHash() => r'7d752275341031aa9dc23b069de3d9401837f26a';
 
 @ProviderFor(AuthController)
 final authControllerProvider = AuthControllerProvider._();
@@ -102,7 +102,7 @@ final class AuthControllerProvider
         argument: null,
         retry: null,
         name: r'authControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -123,7 +123,7 @@ final class AuthControllerProvider
   }
 }
 
-String _$authControllerHash() => r'fad88af9331d442af6764630fcff4ab3fb330602';
+String _$authControllerHash() => r'48c0272479e4b64951871860d669406a616675f8';
 
 abstract class _$AuthController extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

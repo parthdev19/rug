@@ -28,7 +28,7 @@ LocalStorageService localStorage(Ref ref) => LocalStorageService.instance;
 SecureStorageService secureStorage(Ref ref) => SecureStorageService.instance;
 
 /// Whether the user is currently authenticated.
-@riverpod
+@Riverpod(keepAlive: true)
 class IsAuthenticated extends _$IsAuthenticated {
   @override
   bool build() => false;
@@ -38,7 +38,7 @@ class IsAuthenticated extends _$IsAuthenticated {
 }
 
 /// Current user ID (null when not logged in).
-@riverpod
+@Riverpod(keepAlive: true)
 class CurrentUserId extends _$CurrentUserId {
   @override
   String? build() => null;
@@ -51,7 +51,7 @@ class CurrentUserId extends _$CurrentUserId {
 }
 
 /// Current logged in user model (null when not logged in).
-@riverpod
+@Riverpod(keepAlive: true)
 class CurrentUser extends _$CurrentUser {
   @override
   UserModel? build() => null;
