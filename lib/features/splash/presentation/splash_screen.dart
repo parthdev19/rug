@@ -17,18 +17,20 @@ import 'package:rug/features/screen_tracking/models/screen_info_model.dart';
 import 'package:rug/features/screen_tracking/repository/screen_info_repository.dart';
 import 'package:rug/routes/route_names.dart';
 import 'package:rug/services/device/device_info_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rug/features/auth/controller/auth_controller.dart';
 import 'package:rug/services/logging/app_logger.dart';
 import 'package:rug/services/audio/sound_manager.dart';
 import 'package:rug/services/storage/secure_storage_service.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with TickerProviderStateMixin {
   late final SplashAnimationController _anim;
 
@@ -55,8 +57,24 @@ class _SplashScreenState extends State<SplashScreen>
       await _trackInitialScreen();
     }
 
+    // Check & restore existing authenticated session
+    final restoredUser = await ref
+        .read(authControllerProvider.notifier)
+        .restoreSession();
+
     await animation;
-    if (mounted) context.go(RouteNames.auth);
+    if (!mounted) return;
+
+    if (restoredUser != null) {
+      if (!restoredUser.isUsernameSet ||
+          restoredUser.username.trim().isEmpty) {
+        context.go(RouteNames.setUsername);
+      } else {
+        context.go(RouteNames.home);
+      }
+    } else {
+      context.go(RouteNames.auth);
+    }
   }
 
   Future<void> _trackInitialScreen() async {

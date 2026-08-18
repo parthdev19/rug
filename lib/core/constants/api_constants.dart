@@ -7,8 +7,8 @@ class ApiConstants {
   ApiConstants._();
 
   // Base URLs — overridden per environment via EnvConfig
-  static const String devBaseUrl = 'https://rbzv2l7n-1902.inc1.devtunnels.ms';
-  // static const String devBaseUrl = 'https://g66p29zh-1902.inc1.devtunnels.ms';
+  // static const String devBaseUrl = 'https://rbzv2l7n-1902.inc1.devtunnels.ms';
+  static const String devBaseUrl = 'https://g66p29zh-1902.inc1.devtunnels.ms';
   static const String stagingBaseUrl = 'https://staging-api.rug.game';
   static const String prodBaseUrl = 'https://api.rug.game';
 

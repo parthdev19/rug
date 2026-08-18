@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rug/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:rug/features/auth/domain/repositories/auth_repository.dart';
+import 'package:rug/shared/models/user_model.dart';
 import 'package:rug/shared/providers/common_providers.dart';
 import 'package:rug/services/logging/app_logger.dart';
+import 'package:rug/services/storage/secure_storage_service.dart';
 
 part 'auth_controller.g.dart';
 
@@ -26,6 +28,44 @@ class AuthController extends _$AuthController {
   @override
   AsyncValue<void> build() {
     return const AsyncData(null);
+  }
+
+  /// Restores saved authentication session on app startup.
+  Future<UserModel?> restoreSession() async {
+    try {
+      final secure = SecureStorageService.instance;
+      final isLoggedIn = await secure.isLoggedIn();
+      final token = await secure.getAccessToken();
+
+      if (!isLoggedIn || token == null || token.isEmpty) {
+        ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
+        return null;
+      }
+
+      final repository = ref.read(authRepositoryProvider);
+      final profileData = await repository.getProfile();
+      final user = UserModel.fromJson(profileData);
+
+      ref.read(currentUserProvider.notifier).setUser(user);
+      ref.read(currentUserIdProvider.notifier).setUserId(user.id);
+      ref.read(isAuthenticatedProvider.notifier).setAuthenticated(true);
+
+      return user;
+    } catch (e, st) {
+      AppLogger.error(
+        'Restore session failed — clearing local auth',
+        error: e,
+        stackTrace: st,
+      );
+      final secure = SecureStorageService.instance;
+      await secure.clearAuth();
+
+      ref.read(currentUserProvider.notifier).clearUser();
+      ref.read(currentUserIdProvider.notifier).clearUserId();
+      ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
+
+      return null;
+    }
   }
 
   Future<bool> signInWithGoogle() async {
@@ -138,6 +178,8 @@ class AuthController extends _$AuthController {
     } catch (e, st) {
       AppLogger.error('Logout failed', error: e, stackTrace: st);
       // Even if API fails, clear local state
+      final secure = SecureStorageService.instance;
+      await secure.clearAuth();
       ref.read(currentUserProvider.notifier).clearUser();
       ref.read(currentUserIdProvider.notifier).clearUserId();
       ref.read(isAuthenticatedProvider.notifier).setAuthenticated(false);
