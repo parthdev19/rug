@@ -20,7 +20,7 @@ final class RegisterControllerProvider
         argument: null,
         retry: null,
         name: r'registerControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -42,7 +42,7 @@ final class RegisterControllerProvider
 }
 
 String _$registerControllerHash() =>
-    r'ff845e851402ce78436b858d5471f91289b0218a';
+    r'e6e96ddde7ba474d6705ac4af6569dd09b74a09f';
 
 abstract class _$RegisterController extends $Notifier<RegisterState> {
   RegisterState build();

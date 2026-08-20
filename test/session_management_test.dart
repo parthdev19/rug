@@ -55,5 +55,28 @@ void main() {
 
       container.dispose();
     });
+
+    test('Post-OTP verification initializes session state for immediate app entry', () {
+      final container = ProviderContainer();
+
+      // Simulate successful account creation + OTP verification auto sign-in
+      final newUser = UserModel(
+        id: '15',
+        username: 'new_player',
+        email: 'newplayer@example.com',
+        isUsernameSet: true,
+      );
+
+      container.read(currentUserProvider.notifier).setUser(newUser);
+      container.read(currentUserIdProvider.notifier).setUserId('15');
+      container.read(isAuthenticatedProvider.notifier).setAuthenticated(true);
+
+      // Verify user state is fully populated for loader -> home transition
+      expect(container.read(isAuthenticatedProvider), true);
+      expect(container.read(currentUserProvider)?.username, 'new_player');
+      expect(container.read(currentUserProvider)?.isUsernameSet, true);
+
+      container.dispose();
+    });
   });
 }

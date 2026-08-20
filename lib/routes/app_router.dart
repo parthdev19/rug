@@ -63,12 +63,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         }
       }
 
-      // If user has set a username and attempts to visit setUsername, redirect to home.
-      if (location == RouteNames.setUsername &&
+      // If user has set a username and attempts to visit setUsername or any auth screen, redirect to home.
+      if (isAuth &&
           user != null &&
           user.isUsernameSet &&
           user.username.trim().isNotEmpty) {
-        return RouteNames.home;
+        if (location == RouteNames.setUsername ||
+            (location.startsWith('/auth') &&
+                location != RouteNames.postLoginLoading)) {
+          return RouteNames.home;
+        }
       }
 
       return null;

@@ -7,6 +7,7 @@ library;
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rug/features/auth/controller/auth_controller.dart';
+import 'package:rug/features/auth/controller/register_controller.dart';
 import 'package:rug/services/logging/app_logger.dart';
 
 part 'sign_up_otp_controller.g.dart';
@@ -46,8 +47,7 @@ class SignUpOtpState {
     );
   }
 }
-
-@riverpod
+@Riverpod(keepAlive: true)
 class SignUpOtpController extends _$SignUpOtpController {
   Timer? _timer;
 
@@ -70,7 +70,11 @@ class SignUpOtpController extends _$SignUpOtpController {
   }
 
   /// Verify the signup OTP — 4-digit code sent after registration.
-  Future<bool> verifyOtp({required String email, required String code}) async {
+  Future<bool> verifyOtp({
+    required String email,
+    required String code,
+    String? password,
+  }) async {
     final otpInt = int.tryParse(code);
     if (otpInt == null) {
       state = state.copyWith(verifyError: 'Please enter a valid 4-digit code.');
@@ -87,12 +91,29 @@ class SignUpOtpController extends _$SignUpOtpController {
       final repository = ref.read(authRepositoryProvider);
       await repository.verifyOtp(email: email, otp: otpInt);
       _timer?.cancel();
-      state = state.copyWith(isVerifyLoading: false, isVerifySuccess: true);
+
+      // Retrieve registered password if not explicitly passed
+      final userPassword =
+          password ?? ref.read(registerControllerProvider).password;
+
+      if (userPassword.isNotEmpty) {
+        // Authenticate user and persist session & token in SecureStorageService
+        await ref.read(authControllerProvider.notifier).signInWithEmail(
+              email: email,
+              password: userPassword,
+            );
+      }
+
+      if (ref.mounted) {
+        state = state.copyWith(isVerifyLoading: false, isVerifySuccess: true);
+      }
       return true;
     } catch (e) {
       AppLogger.error('SignUp OTP verify error', error: e);
       final msg = e.toString().replaceFirst('Exception: ', '');
-      state = state.copyWith(isVerifyLoading: false, verifyError: msg);
+      if (ref.mounted) {
+        state = state.copyWith(isVerifyLoading: false, verifyError: msg);
+      }
       return false;
     }
   }

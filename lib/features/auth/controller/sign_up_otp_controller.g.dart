@@ -20,7 +20,7 @@ final class SignUpOtpControllerProvider
         argument: null,
         retry: null,
         name: r'signUpOtpControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -42,7 +42,7 @@ final class SignUpOtpControllerProvider
 }
 
 String _$signUpOtpControllerHash() =>
-    r'2cd1e11ed93605ee837d19cfb42dec7e57358554';
+    r'f9136863895e6fbec68cbf913c1f8a0589bd3557';
 
 abstract class _$SignUpOtpController extends $Notifier<SignUpOtpState> {
   SignUpOtpState build();

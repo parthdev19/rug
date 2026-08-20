@@ -8,7 +8,7 @@ import 'package:rug/shared/providers/common_providers.dart';
 
 part 'register_controller.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class RegisterController extends _$RegisterController {
   @override
   RegisterState build() => const RegisterState();

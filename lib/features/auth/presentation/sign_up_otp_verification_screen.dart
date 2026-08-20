@@ -7,6 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rug/features/auth/controller/register_controller.dart';
 import 'package:rug/features/auth/controller/sign_up_otp_controller.dart';
 import 'package:rug/features/auth/widgets/auth_widgets.dart';
 import 'package:rug/features/splash/widgets/splash_animation_constants.dart';
@@ -89,7 +90,7 @@ class _SignUpOtpVerificationScreenState
             SnackBar(
               backgroundColor: const Color(0xFF0F8A64),
               content: const Text(
-                'Email verified! Please sign in to continue.',
+                'Email verified! Entering the app...',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               behavior: SnackBarBehavior.floating,
@@ -97,7 +98,8 @@ class _SignUpOtpVerificationScreenState
             ),
           );
           ref.read(signUpOtpControllerProvider.notifier).reset();
-          context.go(RouteNames.login);
+          ref.read(registerControllerProvider.notifier).reset();
+          context.go(RouteNames.postLoginLoading);
         }
       }
     });
